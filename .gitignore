@@ -1,0 +1,5 @@
+*.user
+*.exe
+gdd2xna/gdd2xna/bin/
+gdd2xna/gdd2xna/obj/
+gdd2xna/gdd2xnaContent/obj/
