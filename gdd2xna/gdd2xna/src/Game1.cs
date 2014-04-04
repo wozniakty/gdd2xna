@@ -46,7 +46,11 @@ namespace gdd2xna
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-
+            Grid g = new Grid(10, 10);
+            for (int i = 0; i < g.rows * g.cols; i++)
+            {
+                Console.WriteLine(g[i % g.rows, i / g.cols]);
+            }
             // TODO: use this.Content to load your game content here
         }
 
