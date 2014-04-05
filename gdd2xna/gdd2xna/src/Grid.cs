@@ -5,7 +5,7 @@ using System.Text;
 
 namespace gdd2xna
 {
-    public enum Token
+    public enum Tile
     {
         Empty,
         Red,
@@ -19,7 +19,7 @@ namespace gdd2xna
     public class Grid
     {
         public int rows, cols;
-        public Token[,] state;
+        public Tile[,] state;
 
         public Random rnd;
 
@@ -27,25 +27,31 @@ namespace gdd2xna
         {
             rows = r;
             cols = c;
-            state = new Token[r, c];
+            state = new Tile[r, c];
             for( int i = 0; i < r * c; i++ )
             {
-                state[i % r, i / c] = Token.Empty;
+                this[i] = Tile.Empty;
             }
             rnd = new Random();
 
             Regenerate();
         }
 
-        public Token this[int r, int c]
+        public Tile this[int r, int c]
         {
             get { return state[r, c]; }
             set { state[r, c] = value; }
         }
 
-        public Token[] GetRow(int r)
+        public Tile this[int n]
         {
-            Token[] row = new Token[cols];
+            get { return state[n % rows, n / cols]; }
+            set { state[n % rows, n / cols] = value; }
+        }
+
+        public Tile[] GetRow(int r)
+        {
+            Tile[] row = new Tile[cols];
             for (int i = 0; i < cols; i++)
             {
                 row[i] = state[r, i];
@@ -53,9 +59,9 @@ namespace gdd2xna
             return row;
         }
 
-        public Token[] GetCol(int c)
+        public Tile[] GetCol(int c)
         {
-            Token[] col = new Token[rows];
+            Tile[] col = new Tile[rows];
             for (int i = 0; i < cols; i++)
             {
                 col[i] = state[i, c];
@@ -67,7 +73,7 @@ namespace gdd2xna
         {
             for (int i = 0; i < rows * cols; i++)
             {
-                state[i % rows, i / cols] = (Token)rnd.Next(1, 7);
+                state[i % rows, i / cols] = (Tile)rnd.Next(1, 7);
             }
         }
     }
