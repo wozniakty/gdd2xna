@@ -49,22 +49,16 @@ namespace gdd2xna
             Grid g = new Grid(8, 8);
             g.Print();
 
-            for (int i = 0; i < g.rows * g.cols; i++)
+            var matches = g.FindMatches();
+            foreach (var match in matches)
             {
-                int[] match = g.FindMatch(i);
-                if (match.Length > 0)
+                foreach (int i in match)
                 {
-                    Console.Write("Match at " + i + ": ");
-                    for (int j = 0; j < match.Length; j++)
-                    {
-                        Console.Write(match[j] + ",");
-                        g[match[j]] = Tile.Emp;
-                    }
-
-                    Console.WriteLine();
-                    Console.WriteLine("New State:");
-                    g.Print();
+                    Console.Write(i + ",");
+                    g[i] = Tile.Emp;
                 }
+                Console.WriteLine();
+                g.Print();
             }
             // TODO: use this.Content to load your game content here
         }

@@ -103,71 +103,103 @@ namespace gdd2xna
             }
         }
 
-        // Finds any matches with the current tile
-        // Only checks right, and down.  This is to be iterated through from 0 -> rows*cols
-        // So the algorithm is naive. DONT SCREW IT UP
-        public int[] FindMatch(int n)
+        // Returns a list of ALL valid matches with no redudancies
+        // for the current state
+        public List<List<int>> FindMatches()
         {
-            //First we make sure the current node isn't empty
-            if (this[n] == Tile.Emp)
-                return new int[0];
+            //Reference to the current match at each tile
+            var matchSet = new Dictionary<int, List<int>>();
+            //List of all discrete unconnected matches
+            var matches = new List<List<int>>();
 
-            List<int[]> matches = new List<int[]>();
-            //Now we'll check for horizontal
-            int[] hor = FindMatchHorizontal(n);
-            //If that has a match, we'll check all those matched nodes to see if they have any vertical matches
-            List<int[]> horChains = new List<int[]>();
-            if (hor.Length > 0)
+            // First we're going to get all the horizontal matches
+            for (int i = 0; i < rows * cols; i++)
             {
-                for(int i = 1; i < hor.Length; i++)
+                var hor = FindMatchHorizontal(i);
+                if (hor.Length > 0)
                 {
-                    int[] horChain = FindMatchVertical(i);
-                    if (horChain.Length > 0)
-                        horChains.Add(horChain);
-                }
-                // I'm not going to keep recursively looking through this though.
-                // Any realistic situation in the game shouldn't need more than this
-            }
-            matches.Add(hor);
-            matches.AddRange(horChains);
-
-            //Do the same stuff for verticals now
-            int[] ver = FindMatchVertical(n);
-            List<int[]> verChains = new List<int[]>();
-            if (ver.Length > 0)
-            {
-                for(int i = 1; i < ver.Length; i++)
-                {
-                    int[] verChain = FindMatchHorizontal(i);
-                    if (verChain.Length > 0)
+                    var match = new List<int>();
+                    foreach (int index in hor)
                     {
-                        verChains.Add(verChain);
+                        match.Add(index);
+                        matchSet.Add(index, match);
                     }
+                    matches.Add(match);
+                    // And then move our index along to the next unchecked tile
+                    i += hor.Length - 1;
                 }
             }
-            matches.Add(ver);
-            matches.AddRange(verChains);
 
-            //So now we have all of our possible matches
-            //Our next goal is to return a non-duplicate list of every tile affected by matches
-            //This bool array will help us keep track of duplicates
-            bool[] matched = new bool[rows * cols];
-            List<int> finalMatch = new List<int>();
+            //Now that we have all those, we'll reiterate through the list and handle verticals
 
-            for (int i = 0; i < matches.Count; i++)
+            for (int j = 0; j < rows * cols; j++)
             {
-                int[] match = matches[i];
-                for (int j = 0; j < match.Length; j++)
+                // I make a dummy i that goes down the columns since that check is more efficient
+                int i = (j / rows) + ((j % rows) * cols);
+                var ver = FindMatchVertical(i);
+                if (ver.Length > 0)
                 {
-                    if (!matched[match[j]])
+                    //We'll get all the Match lists this match collides with
+                    var collisions = new List<List<int>>();
+                    foreach (int index in ver)
                     {
-                        finalMatch.Add(match[j]);
-                        matched[match[j]] = true;
+                        if (matchSet.ContainsKey(index))
+                            collisions.Add(matchSet[index]);
                     }
+
+                    //If there is only one list, we'll just add new values from this match to that list
+                    if (collisions.Count == 1)
+                    {
+                        var match = collisions.Last();
+                        foreach (int index in ver)
+                        {
+                            if (!match.Contains(index))
+                            {
+                                match.Add(index);
+                                matchSet.Add(index, match);
+                            }
+                        }
+                    } //If there are more than one collision, we'll get rid of all of those and make a new single discrete match
+                    else if (collisions.Count > 1)
+                    {
+                        var match = new List<int>();
+                        foreach (List<int> col in collisions)
+                        {
+                            foreach (int index in col)
+                                matchSet[index] = match;
+                            match.AddRange(col);
+                            matches.Remove(col);
+                        }
+
+                        foreach (int index in ver)
+                        {
+                            if (!match.Contains(index))
+                            {
+                                match.Add(index);
+                                matchSet.Add(index, match);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        //If there is no collision, we just create the match and add it to the list
+                        var match = new List<int>();
+                        foreach (int index in ver)
+                        {
+                            match.Add(index);
+                            matchSet.Add(index, match);
+                        }
+                        matches.Add(match);
+                    
+                    }
+
+                    // And finally move our index along by the length
+                    j += ver.Length - 1;
                 }
             }
 
-            return finalMatch.ToArray();
+            // And then return them!
+            return matches;
         }
 
         public int[] FindMatchVertical(int n)
@@ -191,7 +223,7 @@ namespace gdd2xna
                 if (length < 3) length = 0;
             }
 
-            int[] match = new int[length];
+            var match = new int[length];
             for (int i = 0; i < length; i++)
             {
                 match[i] = n + cols*i;
@@ -220,7 +252,7 @@ namespace gdd2xna
                 if (length < 3) length = 0;
             }
 
-            int[] match = new int[length];
+            var match = new int[length];
             for (int i = 0; i < length; i++)
             {
                 match[i] = n + i;
