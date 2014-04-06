@@ -260,6 +260,41 @@ namespace gdd2xna
             return match;
         }
 
+        public void RefillBoard()
+        {
+            //Store the lowest empty tile, which will help us optimize at the end
+            int lowestEmp = 0;
+            for (int i = rows * cols - 1; i >= 0; i--)
+            {
+                //We'll do a check to make sure we aren't at the very top of the column
+                bool top = false;
+                while (this[i] == Tile.Emp && !top)
+                {
+                    top = true;
+                    var cur = i;
+                    var above = cur - cols;
+                    while (cur > 0)
+                    {
+                        if (this[cur] != Tile.Emp)
+                            top = false;
+
+                        this[cur] = this[above];
+                        cur = above;
+                        above = cur - cols;
+                    }
+
+                    if (top == true && i > lowestEmp)
+                        lowestEmp = i;
+                }
+            }
+
+            for (int i = 0; i <= lowestEmp; i++)
+            {
+                if (this[i] == Tile.Emp)
+                    this[i] = RandomTile();
+            }
+        }
+
         // Helper function for getting a random tile
         public Tile RandomTile()
         {

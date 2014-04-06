@@ -50,15 +50,23 @@ namespace gdd2xna
             g.Print();
 
             var matches = g.FindMatches();
-            foreach (var match in matches)
+            while (matches.Count > 0)
             {
-                foreach (int i in match)
+                foreach (var match in matches)
                 {
-                    Console.Write(i + ",");
-                    g[i] = Tile.Emp;
+                    foreach (int i in match)
+                    {
+                        Console.Write(i + ",");
+                        g[i] = Tile.Emp;
+                    }
+                    Console.WriteLine();
+                    g.Print();
                 }
-                Console.WriteLine();
+
+                Console.WriteLine("\n\nNEW BOARD:");
+                g.RefillBoard();
                 g.Print();
+                matches = g.FindMatches();
             }
             // TODO: use this.Content to load your game content here
         }
