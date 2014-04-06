@@ -68,6 +68,8 @@ namespace gdd2xna
                 g.Print();
                 matches = g.FindMatches();
             }
+
+            Console.WriteLine(g.Deadlocked());
             // TODO: use this.Content to load your game content here
         }
 

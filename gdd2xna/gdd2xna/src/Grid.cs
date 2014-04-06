@@ -39,8 +39,16 @@ namespace gdd2xna
 
         public Tile this[int r, int c]
         {
-            get { return state[r, c]; }
-            set { state[r, c] = value; }
+            get 
+            {
+                if (r < 0 || c < 0 || r >= rows || c >= cols)
+                    return Tile.Emp;
+                return state[r, c]; 
+            }
+            set 
+            { 
+                state[r, c] = value;
+            }
         }
 
         public Tile this[int n]
@@ -293,6 +301,44 @@ namespace gdd2xna
                 if (this[i] == Tile.Emp)
                     this[i] = RandomTile();
             }
+        }
+
+        // Returns true if there is no possible match
+        // Assumes there are no spaces where there are already 3 or more matched
+        public bool Deadlocked()
+        {
+            for (int i = 0; i < rows; i++)
+            {
+                for (int j = 0; j < cols; j++)
+                {
+                    if (this[i, j] == this[i, j + 2] &&
+                        (this[i, j] == this[i - 1, j + 1] ||
+                        this[i, j] == this[i + 1, j + 1]))
+                            return false;
+                    if (this[i, j] == this[i + 2, j] &&
+                        (this[i,j] == this[i + 1,j-1] ||
+                        this[i,j] == this[i+1,j+1]))
+                            return false;
+                    if (this[i, j] == this[i, j + 1] &&
+                        (this[i, j] == this[i - 1, j - 1] ||
+                        this[i, j] == this[i, j - 2] ||
+                        this[i, j] == this[i + 1, j - 1] ||
+                        this[i, j] == this[i + 1, j + 2] ||
+                        this[i, j] == this[i, j + 3] ||
+                        this[i, j] == this[i - 1, j + 2]))
+                            return false;
+                    if(this[i,j] == this[i+1,j] &&
+                        (this[i,j] == this[i-2,j] ||
+                        this[i,j] == this[i-1,j-1] ||
+                        this[i,j] == this[i+2,j-1] ||
+                        this[i,j] == this[i+3,j] ||
+                        this[i,j] == this[i+2,j+1] ||
+                        this[i,j] == this[i-1,j+1]))
+                            return false;
+                }
+            }
+
+            return true;
         }
 
         // Helper function for getting a random tile
