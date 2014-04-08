@@ -1,0 +1,13 @@
+*FileName.LengthInSeconds
+Vivaldi01.215
+Vivaldi02.171
+Vivaldi03.243
+Vivaldi04.305
+Vivaldi05.107
+Vivaldi06.158
+Vivaldi07.304
+Vivaldi08.152
+Vivaldi09.201
+Vivaldi10.208
+Vivaldi11.132
+Vivaldi12.192

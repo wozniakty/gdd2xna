@@ -16,12 +16,26 @@ namespace gdd2xna
     /// </summary>
     public class Game1 : Microsoft.Xna.Framework.Game
     {
+        #region Fields
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+        MusicManager musicManager;
+
+        private bool musicOn;
+        #endregion
+
+        #region Properties
+        public bool MusicOn
+        {
+            get { return musicOn; }
+            set { musicOn = value; }
+        }
+        #endregion
 
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
+            musicManager = new MusicManager(this);
             Content.RootDirectory = "Content";
         }
 
@@ -33,7 +47,10 @@ namespace gdd2xna
         /// </summary>
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
+
+            // load songs to musicManager and play
+            musicManager.Initialize();
+            musicOn = true;
 
             base.Initialize();
         }
@@ -93,7 +110,7 @@ namespace gdd2xna
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
 
-            // TODO: Add your update logic here
+            musicManager.Update(gameTime);
 
             base.Update(gameTime);
         }
