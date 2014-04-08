@@ -25,7 +25,12 @@ namespace gdd2xna
 
         public Grid(int r, int c)
         {
+#if DEBUG
+            rnd = new Random(5);
+#else
             rnd = new Random();
+#endif
+
             rows = r;
             cols = c;
             state = new Tile[r, c];
@@ -34,7 +39,7 @@ namespace gdd2xna
                 this[i] = RandomTile();
             }
 
-            //Regenerate();
+            Regenerate();
         }
 
         public Tile this[int r, int c]
@@ -91,18 +96,19 @@ namespace gdd2xna
         {
             for (int i = 0; i < rows * cols; i++)
             {
-                List<Tile> invalid = new List<Tile>();
+                Tile invalid1 = Tile.Emp;
+                Tile invalid2 = Tile.Emp;
                 //This checks that we are at least on the third tile to the right and there's a 2-match to the left
                 if (i % cols > 1 && this[i - 1] == this[i - 2 ])
                 {
-                    invalid.Add(this[i - 1]);
+                    invalid1 = this[i - 1];
                 } //and this checks that we are at least on the third tile down
-                else if(i / rows > 1 && this[i - cols] == this[i - 2*cols])
+                if(i / rows > 1 && this[i - cols] == this[i - 2*cols])
                 {
-                    invalid.Add(this[i - cols]);
+                    invalid2 = this[i - cols];
                 }
                 Tile next = RandomTile();
-                while(invalid.Contains(next))
+                while(invalid1 == next || invalid2 == next)
                 {
                     next = RandomTile();
                 }
