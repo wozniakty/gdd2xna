@@ -17,7 +17,7 @@ namespace gdd2xna
         #region instance variables
         private List<Song> songList = new List<Song>();
         private String ContentMusicPath = "Music//";
-        private String MusicInfoFileName = "MusicInfo.txt";
+        private String MusicInfoFileName = "../../../Audio/MusicInfo.txt";
         private Game game;
         private bool canPlay;
         private Song currentSong;
