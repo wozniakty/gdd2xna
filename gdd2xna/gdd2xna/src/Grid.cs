@@ -31,7 +31,7 @@ namespace gdd2xna
         public Grid(int r, int c)
         {
 #if DEBUG
-            rnd = new Random(5);
+            rnd = new Random(3);
 #else
             rnd = new Random();
 #endif
@@ -124,7 +124,7 @@ namespace gdd2xna
                 {
                     invalid1 = this[i - 1];
                 } //and this checks that we are at least on the third tile down
-                if(i / rows > 1 && this[i - cols] == this[i - 2*cols])
+                if(i / cols > 1 && this[i - cols] == this[i - 2*cols])
                 {
                     invalid2 = this[i - cols];
                 }
@@ -280,7 +280,7 @@ namespace gdd2xna
             if (this[n] != Tile.Emp)
             {
                 length = 1;
-                for (int i = 1; i < rows - (n / rows); i++)
+                for (int i = 1; i < rows - (n / cols); i++)
                 {
                     if (this[n] == this[n + cols*i])
                     {
