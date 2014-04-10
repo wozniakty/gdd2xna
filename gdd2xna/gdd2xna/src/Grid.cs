@@ -26,6 +26,7 @@ namespace gdd2xna
     {
         
         private Rectangle gridRect;
+        public const int TILE_SIZE = 16;
         private Point position;
         public int rows, cols;
         private Tile[,] state;
@@ -41,8 +42,8 @@ namespace gdd2xna
 
             rows = r;
             cols = c;
-            gridRect.Width = c * 50;
-            gridRect.Height = r * 50;
+            gridRect.Width = c * TILE_SIZE;
+            gridRect.Height = r * TILE_SIZE;
             gridRect.X = x;
             gridRect.Y = y;
             

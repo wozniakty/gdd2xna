@@ -20,7 +20,7 @@ namespace gdd2xna
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         MusicManager musicManager;
-        
+        Texture2D HamSandwich;
         private bool musicOn;
 
         Grid g;
@@ -66,6 +66,7 @@ namespace gdd2xna
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
+            HamSandwich = Content.Load<Texture2D>("Ham_Sandwich");
             g = new Grid(20, 20, 50, 50);
             g.Print();
 
@@ -128,15 +129,65 @@ namespace gdd2xna
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
-            var tile = new Rectangle(i * 50, i * 50, 50, 50);
+            var tileRect = new Rectangle(g.rect.X, g.rect.Y, Grid.TILE_SIZE, Grid.TILE_SIZE);
+            var tileTexture = new Texture2D(GraphicsDevice, Grid.TILE_SIZE, Grid.TILE_SIZE);
+            var tileColor = new Color();
             for (int i = 0; i < g.rows; ++i)
             {
-                for (int j = 0; j < g.cols; ++i)
+                for (int j = 0; j < g.cols; ++j)
                 {
+                    tileTexture = createTileTexture(out tileColor, i, j);
+                    spriteBatch.Draw(tileTexture, tileRect, tileColor);
+
+                    //move the rectangle
+                    var temp = tileRect;
+                    temp.X += Grid.TILE_SIZE;
+                    tileRect = temp;
                 }
+                var tempy = tileRect;
+                tempy.Y += Grid.TILE_SIZE;
+                tempy.X = g.rect.X;
+                tileRect = tempy;
             }
             spriteBatch.End();
             base.Draw(gameTime);
+        }
+
+        private Texture2D createTileTexture(out Color c, int x, int y)
+        {
+            Texture2D t = HamSandwich;
+            
+            /**************************
+             * set texture to an asset*
+             * in switch statement    *
+             * ************************/
+
+            switch (g[x, y])
+            {
+                case Tile.Bla:
+                    c = Color.Black;
+                    break;
+                case Tile.Blu:
+                    c = Color.Blue;
+                    break;
+                case Tile.Gre:
+                    c = Color.Green;
+                    break;
+                case Tile.Pur:
+                    c = Color.Purple;
+                    break;
+                case Tile.Red:
+                    c = Color.Red;
+                    break;
+                case Tile.Yel:
+                    c = Color.Yellow;
+                    break;
+                default:
+                    c = Color.White;
+                    break;
+            }
+
+            return t;
         }
     }
 }
