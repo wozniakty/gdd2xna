@@ -2,7 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.GamerServices;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
 namespace gdd2xna
 {
     public enum Tile
@@ -18,12 +24,14 @@ namespace gdd2xna
 
     public class Grid
     {
+        
+        private Rectangle gridRect;
+        private Point position;
         public int rows, cols;
         private Tile[,] state;
-
         public Random rnd;
 
-        public Grid(int r, int c)
+        public Grid(int r, int c, int x, int y)
         {
 #if DEBUG
             rnd = new Random(5);
@@ -33,6 +41,12 @@ namespace gdd2xna
 
             rows = r;
             cols = c;
+            gridRect.Width = c * 50;
+            gridRect.Height = r * 50;
+            gridRect.X = x;
+            gridRect.Y = y;
+            
+
             state = new Tile[r, c];
             for( int i = 0; i < r * c; i++ )
             {
@@ -41,7 +55,7 @@ namespace gdd2xna
 
             Regenerate();
         }
-
+        #region accessors
         public Tile this[int r, int c]
         {
             get 
@@ -90,7 +104,13 @@ namespace gdd2xna
             }
             return col;
         }
-        
+        public Rectangle rect
+        {
+            get{return gridRect;}
+        }
+        #endregion
+
+        #region logic
         // Regenerates a full board without any matches
         public void Regenerate()
         {
@@ -352,7 +372,7 @@ namespace gdd2xna
         {
             return (Tile)rnd.Next(1, Enum.GetNames(typeof(Tile)).Length);
         }
-
+        #endregion
         //Debug function
         public void Print()
         {

@@ -20,8 +20,11 @@ namespace gdd2xna
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         MusicManager musicManager;
-
+        
         private bool musicOn;
+
+        Grid g;
+
         #endregion
 
         #region Properties
@@ -63,7 +66,7 @@ namespace gdd2xna
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            Grid g = new Grid(20, 20);
+            g = new Grid(20, 20, 50, 50);
             g.Print();
 
             var matches = g.FindMatches();
@@ -124,7 +127,15 @@ namespace gdd2xna
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             // TODO: Add your drawing code here
-
+            spriteBatch.Begin();
+            var tile = new Rectangle(i * 50, i * 50, 50, 50);
+            for (int i = 0; i < g.rows; ++i)
+            {
+                for (int j = 0; j < g.cols; ++i)
+                {
+                }
+            }
+            spriteBatch.End();
             base.Draw(gameTime);
         }
     }
