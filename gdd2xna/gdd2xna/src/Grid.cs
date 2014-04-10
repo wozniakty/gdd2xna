@@ -16,6 +16,11 @@ namespace gdd2xna
         Pur
     }
 
+    public enum Direction
+    {
+        Up, Right, Down, Left
+    }
+
     public class Grid
     {
         public int rows, cols;
@@ -91,7 +96,23 @@ namespace gdd2xna
             return col;
         }
         
-        // Regenerates a full board without any matches
+        /// <summary>
+        /// Returns an array of the indices for possible swaps,
+        /// in order Up, Right, Down, Left (as in the Direction enum).  Any -1 values mean that's not a valid swap location
+        /// </summary>
+        /// <param name="n">The index of the tile</param>
+        /// <returns></returns>
+        public int[] GetSwaps(int n)
+        {
+            return new [] { (n / cols == 0)? -1 : n - cols,
+                ( n % cols == cols - 1 )? -1 : n + 1,
+                (n / cols == rows - 1)? -1 : n + cols,
+                (n % cols == 0)? -1 : n - 1 };
+        }
+        
+        /// <summary>
+        /// Regenerates a full board without any matches
+        /// </summary>
         public void Regenerate()
         {
             for (int i = 0; i < rows * cols; i++)
@@ -117,8 +138,44 @@ namespace gdd2xna
             }
         }
 
-        // Returns a list of ALL valid matches with no redudancies
-        // for the current state
+        /// <summary>
+        /// Swaps the value of the tiles at n1 and n2
+        /// </summary>
+        /// <param name="n1"></param>
+        /// <param name="n2"></param>
+        public void Swap(int n1, int n2)
+        {
+            var temp = this[n1];
+            this[n1] = this[n2];
+            this[n2] = temp;
+        }
+
+        /// <summary>
+        /// Converts all tiles in the Indeces array to be empty
+        /// </summary>
+        /// <param name="indeces"></param>
+        public void EmptyTiles(int[] indeces)
+        {
+            for (int i = 0; i < indeces.Length; i++)
+            {
+                this[indeces[i]] = Tile.Emp;
+            }
+        }
+
+        /// <summary>
+        /// Converts all tiles in the Indeces array to be empty
+        /// </summary>
+        /// <param name="indeces"></param>
+        public void EmptyTiles(List<int> indeces)
+        {
+            EmptyTiles(indeces.ToArray());
+        }
+
+        /// <summary>
+        /// Returns a list of ALL valid matches with no redudancies
+        /// for the current state
+        /// </summary>
+        /// <returns></returns>
         public List<List<int>> FindMatches()
         {
             //Reference to the current match at each tile

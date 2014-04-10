@@ -74,8 +74,8 @@ namespace gdd2xna
                     foreach (int i in match)
                     {
                         Console.Write(i + ",");
-                        g[i] = Tile.Emp;
                     }
+                    g.EmptyTiles(match);
                     Console.WriteLine();
                     g.Print();
                 }
