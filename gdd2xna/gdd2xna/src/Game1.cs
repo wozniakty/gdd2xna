@@ -63,7 +63,7 @@ namespace gdd2xna
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            Grid g = new Grid(20, 20);
+            Grid g = new Grid(20, 10);
             g.Print();
 
             var matches = g.FindMatches();

@@ -62,12 +62,12 @@ namespace gdd2xna
             {
                 if (n < 0 || n > rows * cols - 1)
                     return Tile.Emp;
-                return state[n / cols,n % rows]; 
+                return state[n / cols,n % cols];
             }
             set 
             {
                 if (n >= 0 && n <= rows * cols - 1)
-                    state[n / cols, n % rows] = value;
+                    state[n / cols, n % cols] = value;
             }
         }
 
