@@ -15,7 +15,7 @@ namespace gdd2xna
     {
         Emp,
         Red,
-        Blu,
+        Ora,
         Yel,
         Gre,
         Bla,

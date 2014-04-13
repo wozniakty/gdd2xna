@@ -92,12 +92,45 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Ham_Sandwich.png">
+    <Compile Include="Art\Ham_Sandwich.png">
       <Name>Ham_Sandwich</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Art\Brocoli_Tile.png">
+      <Name>Brocoli_Tile</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Art\Carrot_Tile.png">
+      <Name>Carrot_Tile</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Art\Corn_Tile.png">
+      <Name>Corn_Tile</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Art\Eggplant_Tile.png">
+      <Name>Eggplant_Tile</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Art\Tomato_Tile.png">
+      <Name>Tomato_Tile</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Art\VIA_Grid_V2.png">
+      <Name>VIA_Grid_V2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\$(XnaFrameworkVersion)\Microsoft.Xna.GameStudio.ContentPipeline.targets" />
   <!--  To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

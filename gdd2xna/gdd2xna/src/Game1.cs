@@ -21,6 +21,12 @@ namespace gdd2xna
         SpriteBatch spriteBatch;
         MusicManager musicManager;
         Texture2D HamSandwich;
+        Texture2D Broccoli;
+        Texture2D Carrot;
+        Texture2D Corn;
+        Texture2D Eggplant;
+        Texture2D Tomato;
+        Texture2D Grid_Art;
         private bool musicOn;
 
         Grid g;
@@ -66,7 +72,13 @@ namespace gdd2xna
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            HamSandwich = Content.Load<Texture2D>("Ham_Sandwich");
+            HamSandwich = Content.Load<Texture2D>("Art/Ham_Sandwich");
+            Broccoli = Content.Load<Texture2D>("Art/Brocoli_Tile");
+            Carrot = Content.Load<Texture2D>("Art/Carrot_Tile");
+            Corn = Content.Load<Texture2D>("Art/Corn_Tile");
+            Eggplant = Content.Load<Texture2D>("Art/Eggplant_Tile");
+            Tomato = Content.Load<Texture2D>("Art/Tomato_Tile");
+            Grid_Art = Content.Load<Texture2D>("Art/VIA_Grid_V2");
             g = new Grid(20, 20, 50, 50);
             g.Print();
 
@@ -129,14 +141,18 @@ namespace gdd2xna
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
+            //draw the board
+            spriteBatch.Draw(Grid_Art, g.rect, Color.White);
+            //draw the tiles
             var tileRect = new Rectangle(g.rect.X, g.rect.Y, Grid.TILE_SIZE, Grid.TILE_SIZE);
             var tileTexture = new Texture2D(GraphicsDevice, Grid.TILE_SIZE, Grid.TILE_SIZE);
             var tileColor = new Color();
+            tileColor = Color.White;
             for (int i = 0; i < g.rows; ++i)
             {
                 for (int j = 0; j < g.cols; ++j)
                 {
-                    tileTexture = createTileTexture(out tileColor, i, j);
+                    tileTexture = createTileTexture(i, j);
                     spriteBatch.Draw(tileTexture, tileRect, tileColor);
 
                     //move the rectangle
@@ -153,9 +169,9 @@ namespace gdd2xna
             base.Draw(gameTime);
         }
 
-        private Texture2D createTileTexture(out Color c, int x, int y)
+        private Texture2D createTileTexture(int x, int y)
         {
-            Texture2D t = HamSandwich;
+            Texture2D t;
             
             /**************************
              * set texture to an asset*
@@ -165,26 +181,25 @@ namespace gdd2xna
             switch (g[x, y])
             {
                 case Tile.Bla:
-                    c = Color.Black;
+                    t = HamSandwich;
                     break;
-                case Tile.Blu:
-                    c = Color.Blue;
+                case Tile.Ora:
+                    t = Carrot;
                     break;
                 case Tile.Gre:
-                    c = Color.Green;
+                    t = Broccoli;
                     break;
                 case Tile.Pur:
-                    c = Color.Purple;
+                    t = Eggplant;
                     break;
                 case Tile.Red:
-                    c = Color.Red;
+                    t = Tomato;
                     break;
                 case Tile.Yel:
-                    c = Color.Yellow;
+                    t = Corn;
                     break;
                 default:
-                    c = Color.White;
-                    break;
+                    throw new Exception("Could not assign texture");
             }
 
             return t;
