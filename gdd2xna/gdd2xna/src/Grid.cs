@@ -18,24 +18,30 @@ namespace gdd2xna
         Ora,
         Yel,
         Gre,
-        Bla,
         Pur
+    }
+
+    public enum Direction
+    {
+        Up, Right, Down, Left
     }
 
     public class Grid
     {
         
         private Rectangle gridRect;
-        public const int TILE_SIZE = 16;
+        public const int TILE_SIZE = 32;
         private Point position;
         public int rows, cols;
         private Tile[,] state;
         public Random rnd;
+        private Game1 main;
 
-        public Grid(int r, int c, int x, int y)
+        public Grid(int r, int c, int x, int y, Game1 m)
         {
+            main = m;
 #if DEBUG
-            rnd = new Random(5);
+            rnd = new Random(3);
 #else
             rnd = new Random();
 #endif
@@ -105,6 +111,7 @@ namespace gdd2xna
             }
             return col;
         }
+
         public Rectangle rect
         {
             get{return gridRect;}
@@ -112,7 +119,24 @@ namespace gdd2xna
         #endregion
 
         #region logic
-        // Regenerates a full board without any matches
+        
+        /// <summary>
+        /// Returns an array of the indices for possible swaps,
+        /// in order Up, Right, Down, Left (as in the Direction enum).  Any -1 values mean that's not a valid swap location
+        /// </summary>
+        /// <param name="n">The index of the tile</param>
+        /// <returns></returns>
+        public int[] GetSwaps(int n)
+        {
+            return new [] { (n / cols == 0)? -1 : n - cols,
+                ( n % cols == cols - 1 )? -1 : n + 1,
+                (n / cols == rows - 1)? -1 : n + cols,
+                (n % cols == 0)? -1 : n - 1 };
+        }
+        
+        /// <summary>
+        /// Regenerates a full board without any matches
+        /// </summary>
         public void Regenerate()
         {
             for (int i = 0; i < rows * cols; i++)
@@ -124,7 +148,7 @@ namespace gdd2xna
                 {
                     invalid1 = this[i - 1];
                 } //and this checks that we are at least on the third tile down
-                if(i / rows > 1 && this[i - cols] == this[i - 2*cols])
+                if(i / cols > 1 && this[i - cols] == this[i - 2*cols])
                 {
                     invalid2 = this[i - cols];
                 }
@@ -138,8 +162,44 @@ namespace gdd2xna
             }
         }
 
-        // Returns a list of ALL valid matches with no redudancies
-        // for the current state
+        /// <summary>
+        /// Swaps the value of the tiles at n1 and n2
+        /// </summary>
+        /// <param name="n1"></param>
+        /// <param name="n2"></param>
+        public void Swap(int n1, int n2)
+        {
+            var temp = this[n1];
+            this[n1] = this[n2];
+            this[n2] = temp;
+        }
+
+        /// <summary>
+        /// Converts all tiles in the Indeces array to be empty
+        /// </summary>
+        /// <param name="indeces"></param>
+        public void EmptyTiles(int[] indeces)
+        {
+            for (int i = 0; i < indeces.Length; i++)
+            {
+                this[indeces[i]] = Tile.Emp;
+            }
+        }
+
+        /// <summary>
+        /// Converts all tiles in the Indeces array to be empty
+        /// </summary>
+        /// <param name="indeces"></param>
+        public void EmptyTiles(List<int> indeces)
+        {
+            EmptyTiles(indeces.ToArray());
+        }
+
+        /// <summary>
+        /// Returns a list of ALL valid matches with no redudancies
+        /// for the current state
+        /// </summary>
+        /// <returns></returns>
         public List<List<int>> FindMatches()
         {
             //Reference to the current match at each tile
@@ -244,7 +304,7 @@ namespace gdd2xna
             if (this[n] != Tile.Emp)
             {
                 length = 1;
-                for (int i = 1; i < rows - (n / rows); i++)
+                for (int i = 1; i < rows - (n / cols); i++)
                 {
                     if (this[n] == this[n + cols*i])
                     {
@@ -374,6 +434,72 @@ namespace gdd2xna
             return (Tile)rnd.Next(1, Enum.GetNames(typeof(Tile)).Length);
         }
         #endregion
+
+        #region Draw code
+
+        public void Draw(SpriteBatch sb)
+        {
+            //draw the board
+            sb.Draw(main.Grid_Art, gridRect, Color.White);
+            //draw the tiles
+            var tileRect = new Rectangle(gridRect.X, gridRect.Y, Grid.TILE_SIZE, Grid.TILE_SIZE);
+            var tileTexture = new Texture2D(main.GraphicsDevice, Grid.TILE_SIZE, Grid.TILE_SIZE);
+            var tileColor = new Color();
+            tileColor = Color.White;
+            for (int i = 0; i < rows; ++i)
+            {
+                for (int j = 0; j < cols; ++j)
+                {
+                    tileTexture = createTileTexture(i, j);
+                    sb.Draw(tileTexture, tileRect, tileColor);
+
+                    //move the rectangle
+                    var temp = tileRect;
+                    temp.X += Grid.TILE_SIZE;
+                    tileRect = temp;
+                }
+                var tempy = tileRect;
+                tempy.Y += Grid.TILE_SIZE;
+                tempy.X = gridRect.X;
+                tileRect = tempy;
+            }
+        }
+
+        private Texture2D createTileTexture(int x, int y)
+        {
+            Texture2D t;
+
+            /**************************
+             * set texture to an asset*
+             * in switch statement    *
+             * ************************/
+
+            switch (this[x, y])
+            {
+                case Tile.Ora:
+                    t = main.Carrot;
+                    break;
+                case Tile.Gre:
+                    t = main.Broccoli;
+                    break;
+                case Tile.Pur:
+                    t = main.Eggplant;
+                    break;
+                case Tile.Red:
+                    t = main.Tomato;
+                    break;
+                case Tile.Yel:
+                    t = main.Corn;
+                    break;
+                default:
+                    throw new Exception("Could not assign texture");
+            }
+
+            return t;
+        }
+        #endregion
+
+        #region Debug utilities
         //Debug function
         public void Print()
         {
@@ -387,5 +513,7 @@ namespace gdd2xna
                 Console.WriteLine();
             }
         }
+
+        #endregion
     }
 }

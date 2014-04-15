@@ -20,13 +20,13 @@ namespace gdd2xna
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         MusicManager musicManager;
-        Texture2D HamSandwich;
-        Texture2D Broccoli;
-        Texture2D Carrot;
-        Texture2D Corn;
-        Texture2D Eggplant;
-        Texture2D Tomato;
-        Texture2D Grid_Art;
+        public Texture2D HamSandwich;
+        public Texture2D Broccoli;
+        public Texture2D Carrot;
+        public Texture2D Corn;
+        public Texture2D Eggplant;
+        public Texture2D Tomato;
+        public Texture2D Grid_Art;
         private bool musicOn;
 
         Grid g;
@@ -56,7 +56,7 @@ namespace gdd2xna
         /// </summary>
         protected override void Initialize()
         {
-
+            this.IsMouseVisible = true;
             // load songs to musicManager and play
             musicManager.Initialize();
             musicOn = true;
@@ -79,30 +79,8 @@ namespace gdd2xna
             Eggplant = Content.Load<Texture2D>("Art/Eggplant_Tile");
             Tomato = Content.Load<Texture2D>("Art/Tomato_Tile");
             Grid_Art = Content.Load<Texture2D>("Art/VIA_Grid_V2");
-            g = new Grid(20, 20, 50, 50);
-            g.Print();
+            g = new Grid(10, 10, 50, 50, this);
 
-            var matches = g.FindMatches();
-            while (matches.Count > 0)
-            {
-                foreach (var match in matches)
-                {
-                    foreach (int i in match)
-                    {
-                        Console.Write(i + ",");
-                        g[i] = Tile.Emp;
-                    }
-                    Console.WriteLine();
-                    g.Print();
-                }
-
-                Console.WriteLine("\n\nNEW BOARD:");
-                g.RefillBoard();
-                g.Print();
-                matches = g.FindMatches();
-            }
-
-            Console.WriteLine(g.Deadlocked());
             // TODO: use this.Content to load your game content here
         }
 
@@ -141,68 +119,11 @@ namespace gdd2xna
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
-            //draw the board
-            spriteBatch.Draw(Grid_Art, g.rect, Color.White);
-            //draw the tiles
-            var tileRect = new Rectangle(g.rect.X, g.rect.Y, Grid.TILE_SIZE, Grid.TILE_SIZE);
-            var tileTexture = new Texture2D(GraphicsDevice, Grid.TILE_SIZE, Grid.TILE_SIZE);
-            var tileColor = new Color();
-            tileColor = Color.White;
-            for (int i = 0; i < g.rows; ++i)
-            {
-                for (int j = 0; j < g.cols; ++j)
-                {
-                    tileTexture = createTileTexture(i, j);
-                    spriteBatch.Draw(tileTexture, tileRect, tileColor);
 
-                    //move the rectangle
-                    var temp = tileRect;
-                    temp.X += Grid.TILE_SIZE;
-                    tileRect = temp;
-                }
-                var tempy = tileRect;
-                tempy.Y += Grid.TILE_SIZE;
-                tempy.X = g.rect.X;
-                tileRect = tempy;
-            }
+            g.Draw(spriteBatch);
+
             spriteBatch.End();
             base.Draw(gameTime);
-        }
-
-        private Texture2D createTileTexture(int x, int y)
-        {
-            Texture2D t;
-            
-            /**************************
-             * set texture to an asset*
-             * in switch statement    *
-             * ************************/
-
-            switch (g[x, y])
-            {
-                case Tile.Bla:
-                    t = HamSandwich;
-                    break;
-                case Tile.Ora:
-                    t = Carrot;
-                    break;
-                case Tile.Gre:
-                    t = Broccoli;
-                    break;
-                case Tile.Pur:
-                    t = Eggplant;
-                    break;
-                case Tile.Red:
-                    t = Tomato;
-                    break;
-                case Tile.Yel:
-                    t = Corn;
-                    break;
-                default:
-                    throw new Exception("Could not assign texture");
-            }
-
-            return t;
         }
     }
 }
