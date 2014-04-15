@@ -11,6 +11,14 @@ using Microsoft.Xna.Framework.Media;
 
 namespace gdd2xna
 {
+    public enum GameState
+    {
+        Menu,
+        Animate, // Board should animate and disallow input
+        Input // Board should allow input
+    }
+
+
     /// <summary>
     /// This is the main type for your game
     /// </summary>
@@ -31,6 +39,7 @@ namespace gdd2xna
         private bool musicOn;
 
         private Grid grid;
+        public GameState state;
 
         #endregion
 
@@ -62,6 +71,7 @@ namespace gdd2xna
             musicManager.Initialize();
             musicOn = true;
             grid = new Grid(8, 8, 50, 50, this);
+            state = GameState.Input;
 
             base.Initialize();
         }
@@ -109,20 +119,57 @@ namespace gdd2xna
 
             musicManager.Update(gameTime);
             Input.Update();
-
-            if (Input.MouseCurrent.LeftButton == ButtonState.Pressed && Input.MousePrevious.LeftButton != ButtonState.Pressed)
+            if (state == GameState.Input)
             {
-                var mousePos = Input.MousePos();
-                var gridPos = grid.ScreenToGrid(mousePos.X, mousePos.Y);
-                var gridNum = grid.RCtoN( gridPos[0], gridPos[1]);
-                var swaps = grid.GetSwaps(gridNum);
 
-                if (!grid.HasActiveSelection())
+                if (Input.LeftClick())
                 {
-                    grid.UpdateSelection(gridPos[0], gridPos[1]);
-                }
-                else
-                {
+                    var mousePos = Input.MousePos();
+                    var gridPos = grid.ScreenToGrid(mousePos.X, mousePos.Y);
+                    var gridNum = grid.RCtoN(gridPos[0], gridPos[1]);
+
+                    if (!grid.HasActiveSelection())
+                    {
+                        grid.UpdateSelection(gridPos[0], gridPos[1]);
+                    }
+                    else
+                    {
+                        var selectNum = grid.RCtoN(grid.selection[0], grid.selection[1]);
+                        var swaps = grid.GetSwaps(selectNum);
+                        if (swaps.Contains(gridNum))
+                        {
+                            grid.Swap(selectNum, gridNum);
+
+                            var matches = grid.FindMatches();
+
+                            if (matches.Count == 0) grid.Swap(selectNum, gridNum);
+
+                            while (matches.Count > 0)
+                            {
+                                foreach (var match in matches)
+                                {
+                                    foreach (var i in match)
+                                    {
+                                        Console.Write(grid[i] + ",");
+                                        grid[i] = Tile.Emp;
+                                    }
+                                    Console.WriteLine();
+                                }
+
+                                grid.RefillBoard();
+                                matches = grid.FindMatches();
+                            }
+
+                            Console.WriteLine();
+                            grid.ClearSelection();
+                            if (grid.Deadlocked())
+                                Console.WriteLine("SORRY, it's deadlocked and we don't have a solution for that yet...");
+                        }
+                        else
+                        {
+                            grid.UpdateSelection(gridPos[0], gridPos[1]);
+                        }
+                    }
                 }
             }
 

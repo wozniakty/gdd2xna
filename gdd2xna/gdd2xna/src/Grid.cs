@@ -129,6 +129,12 @@ namespace gdd2xna
         {
             return selection[0] >= 0 && selection[0] < rows && selection[1] >= 0 && selection[1] < cols;
         }
+
+        public void ClearSelection()
+        {
+            selection[0] = -1;
+            selection[1] = -1;
+        }
         #endregion
 
         #region logic

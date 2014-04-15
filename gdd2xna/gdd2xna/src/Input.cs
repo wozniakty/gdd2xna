@@ -37,6 +37,11 @@ namespace gdd2xna
             return new Point(MouseCurrent.X - MousePrevious.X, MouseCurrent.Y - MousePrevious.Y);
         }
 
+        public static bool LeftClick()
+        {
+            return MouseCurrent.LeftButton == ButtonState.Pressed && MousePrevious.LeftButton != ButtonState.Pressed;
+        }
+
         public static bool KeyPress( Keys k )
         {
             return KeyCurrent.IsKeyDown(k) && KeyPrevious.IsKeyUp(k);
