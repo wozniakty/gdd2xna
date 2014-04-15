@@ -78,6 +78,7 @@
     <Compile Include="Audio\MusicManager.cs" />
     <Compile Include="src\Grid.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="src\Input.cs" />
     <Compile Include="src\Program.cs" />
     <Compile Include="src\Game1.cs" />
   </ItemGroup>

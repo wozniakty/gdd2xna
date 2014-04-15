@@ -30,8 +30,9 @@ namespace gdd2xna
     {
         
         private Rectangle gridRect;
-        public const int TILE_SIZE = 32;
+        public const int TILE_SIZE = 48;
         private Point position;
+        public int[] selection;
         public int rows, cols;
         private Tile[,] state;
         public Random rnd;
@@ -59,6 +60,7 @@ namespace gdd2xna
             {
                 this[i] = RandomTile();
             }
+            selection = new int[2] { -1, -1 };
 
             Regenerate();
         }
@@ -116,6 +118,17 @@ namespace gdd2xna
         {
             get{return gridRect;}
         }
+
+        public void UpdateSelection( int row, int col )
+        {
+            selection[0] = row;
+            selection[1] = col;
+        }
+
+        public bool HasActiveSelection()
+        {
+            return selection[0] >= 0 && selection[0] < rows && selection[1] >= 0 && selection[1] < cols;
+        }
         #endregion
 
         #region logic
@@ -132,6 +145,11 @@ namespace gdd2xna
                 ( n % cols == cols - 1 )? -1 : n + 1,
                 (n / cols == rows - 1)? -1 : n + cols,
                 (n % cols == 0)? -1 : n - 1 };
+        }
+
+        public int[] GetSwaps(int row, int col)
+        {
+            return GetSwaps(RCtoN(row,col));
         }
         
         /// <summary>
@@ -433,6 +451,27 @@ namespace gdd2xna
         {
             return (Tile)rnd.Next(1, Enum.GetNames(typeof(Tile)).Length);
         }
+
+        /// <summary>
+        /// Converts screen space X and Y to a grid space row, and column
+        /// </summary>
+        /// <param name="X">Screen X</param>
+        /// <param name="Y">Screen Y</param>
+        /// <returns>An array containing the Row and Column in grid space</returns>
+        public int[] ScreenToGrid(int X, int Y)
+        {
+            if( gridRect.Contains( X, Y ) )
+            {
+                return new int[2]{ (Y - gridRect.Y) / TILE_SIZE, (X - gridRect.X) / TILE_SIZE };
+            }
+            return new int[2] { -1, -1 };
+        }
+
+        public int RCtoN(int row, int col)
+        {
+            return (row * cols) + col;
+        }
+
         #endregion
 
         #region Draw code
@@ -452,6 +491,10 @@ namespace gdd2xna
                 {
                     tileTexture = createTileTexture(i, j);
                     sb.Draw(tileTexture, tileRect, tileColor);
+                    if (selection[0] == i && selection[1]== j)
+                    {
+                        main.DrawBorder(sb, tileRect, 3, Color.White);
+                    }
 
                     //move the rectangle
                     var temp = tileRect;

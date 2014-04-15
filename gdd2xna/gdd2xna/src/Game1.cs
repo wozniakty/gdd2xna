@@ -27,9 +27,10 @@ namespace gdd2xna
         public Texture2D Eggplant;
         public Texture2D Tomato;
         public Texture2D Grid_Art;
+        public Texture2D Pixel;
         private bool musicOn;
 
-        Grid g;
+        private Grid grid;
 
         #endregion
 
@@ -60,6 +61,7 @@ namespace gdd2xna
             // load songs to musicManager and play
             musicManager.Initialize();
             musicOn = true;
+            grid = new Grid(8, 8, 50, 50, this);
 
             base.Initialize();
         }
@@ -79,7 +81,8 @@ namespace gdd2xna
             Eggplant = Content.Load<Texture2D>("Art/Eggplant_Tile");
             Tomato = Content.Load<Texture2D>("Art/Tomato_Tile");
             Grid_Art = Content.Load<Texture2D>("Art/VIA_Grid_V2");
-            g = new Grid(10, 10, 50, 50, this);
+            Pixel = new Texture2D(GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
+            Pixel.SetData(new[] { Color.White });
 
             // TODO: use this.Content to load your game content here
         }
@@ -105,6 +108,23 @@ namespace gdd2xna
                 this.Exit();
 
             musicManager.Update(gameTime);
+            Input.Update();
+
+            if (Input.MouseCurrent.LeftButton == ButtonState.Pressed && Input.MousePrevious.LeftButton != ButtonState.Pressed)
+            {
+                var mousePos = Input.MousePos();
+                var gridPos = grid.ScreenToGrid(mousePos.X, mousePos.Y);
+                var gridNum = grid.RCtoN( gridPos[0], gridPos[1]);
+                var swaps = grid.GetSwaps(gridNum);
+
+                if (!grid.HasActiveSelection())
+                {
+                    grid.UpdateSelection(gridPos[0], gridPos[1]);
+                }
+                else
+                {
+                }
+            }
 
             base.Update(gameTime);
         }
@@ -120,10 +140,42 @@ namespace gdd2xna
             // TODO: Add your drawing code here
             spriteBatch.Begin();
 
-            g.Draw(spriteBatch);
+            grid.Draw(spriteBatch);
 
             spriteBatch.End();
             base.Draw(gameTime);
         }
+
+        #region Utilities
+        
+        /// <summary>
+        /// Will draw a border (hollow rectangle) of the given 'thicknessOfBorder' (in pixels)
+        /// of the specified color.
+        ///
+        /// By Sean Colombo, from http://bluelinegamestudios.com/blog
+        /// </summary>
+        /// <param name="rectangleToDraw"></param>
+        /// <param name="thicknessOfBorder"></param>
+        public void DrawBorder(SpriteBatch sb, Rectangle rectangleToDraw, int thicknessOfBorder, Color borderColor)
+        {
+            // Draw top line
+            sb.Draw(Pixel, new Rectangle(rectangleToDraw.X, rectangleToDraw.Y, rectangleToDraw.Width, thicknessOfBorder), borderColor);
+
+            // Draw left line
+            sb.Draw(Pixel, new Rectangle(rectangleToDraw.X, rectangleToDraw.Y, thicknessOfBorder, rectangleToDraw.Height), borderColor);
+
+            // Draw right line
+            sb.Draw(Pixel, new Rectangle((rectangleToDraw.X + rectangleToDraw.Width - thicknessOfBorder),
+                                            rectangleToDraw.Y,
+                                            thicknessOfBorder,
+                                            rectangleToDraw.Height), borderColor);
+            // Draw bottom line
+            sb.Draw(Pixel, new Rectangle(rectangleToDraw.X,
+                                            rectangleToDraw.Y + rectangleToDraw.Height - thicknessOfBorder,
+                                            rectangleToDraw.Width,
+                                            thicknessOfBorder), borderColor);
+        }
+
+        #endregion
     }
 }
