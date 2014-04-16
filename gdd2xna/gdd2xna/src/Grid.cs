@@ -18,7 +18,9 @@ namespace gdd2xna
         Ora,
         Yel,
         Gre,
-        Pur
+        Pur,
+        Pnk,
+        Wht
     }
 
     public enum Direction
@@ -539,6 +541,12 @@ namespace gdd2xna
                     break;
                 case Tile.Yel:
                     t = main.Corn;
+                    break;
+                case Tile.Pnk:
+                    t = main.Radish;
+                    break;
+                case Tile.Wht:
+                    t = main.Onion;
                     break;
                 default:
                     throw new Exception("Could not assign texture");

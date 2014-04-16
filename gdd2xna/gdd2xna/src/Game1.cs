@@ -34,6 +34,8 @@ namespace gdd2xna
         public Texture2D Corn;
         public Texture2D Eggplant;
         public Texture2D Tomato;
+        public Texture2D Onion;
+        public Texture2D Radish;
         public Texture2D Grid_Art;
         public Texture2D Pixel;
         private bool musicOn;
@@ -90,6 +92,8 @@ namespace gdd2xna
             Corn = Content.Load<Texture2D>("Art/Corn_Tile");
             Eggplant = Content.Load<Texture2D>("Art/Eggplant_Tile");
             Tomato = Content.Load<Texture2D>("Art/Tomato_Tile");
+            Onion = Content.Load<Texture2D>("Art/Onion_Tile");
+            Radish = Content.Load<Texture2D>("Art/Radish_Tile");
             Grid_Art = Content.Load<Texture2D>("Art/VIA_Grid_V2");
             Pixel = new Texture2D(GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
             Pixel.SetData(new[] { Color.White });
