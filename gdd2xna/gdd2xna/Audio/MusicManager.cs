@@ -39,7 +39,7 @@ namespace gdd2xna
 
         /// <summary>
         /// Allows the class to play music
-        /// Does nothing music is already playing
+        /// Does nothing if music is already playing
         /// </summary>
         public void Play()
         {
