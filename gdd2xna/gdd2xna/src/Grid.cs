@@ -11,7 +11,8 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 namespace gdd2xna
 {
-    public enum Tile
+
+    public enum TileType
     {
         Emp,
         Red,
@@ -36,7 +37,7 @@ namespace gdd2xna
         private Point position;
         public int[] selection;
         public int rows, cols;
-        private Tile[,] state;
+        private TileType[,] state;
         public Random rnd;
         private Game1 main;
 
@@ -57,7 +58,7 @@ namespace gdd2xna
             gridRect.Y = y;
             
 
-            state = new Tile[r, c];
+            state = new TileType[r, c];
             for( int i = 0; i < r * c; i++ )
             {
                 this[i] = RandomTile();
@@ -67,12 +68,12 @@ namespace gdd2xna
             Regenerate();
         }
         #region accessors
-        public Tile this[int r, int c]
+        public TileType this[int r, int c]
         {
             get 
             {
                 if (r < 0 || c < 0 || r >= rows || c >= cols)
-                    return Tile.Emp;
+                    return TileType.Emp;
                 return state[r, c]; 
             }
             set 
@@ -81,12 +82,12 @@ namespace gdd2xna
             }
         }
 
-        public Tile this[int n]
+        public TileType this[int n]
         {
             get 
             {
                 if (n < 0 || n > rows * cols - 1)
-                    return Tile.Emp;
+                    return TileType.Emp;
                 return state[n / cols,n % cols];
             }
             set 
@@ -96,9 +97,9 @@ namespace gdd2xna
             }
         }
 
-        public Tile[] GetRow(int r)
+        public TileType[] GetRow(int r)
         {
-            Tile[] row = new Tile[cols];
+            TileType[] row = new TileType[cols];
             for (int i = 0; i < cols; i++)
             {
                 row[i] = state[r, i];
@@ -106,9 +107,9 @@ namespace gdd2xna
             return row;
         }
 
-        public Tile[] GetCol(int c)
+        public TileType[] GetCol(int c)
         {
-            Tile[] col = new Tile[rows];
+            TileType[] col = new TileType[rows];
             for (int i = 0; i < cols; i++)
             {
                 col[i] = state[i, c];
@@ -167,8 +168,8 @@ namespace gdd2xna
         {
             for (int i = 0; i < rows * cols; i++)
             {
-                Tile invalid1 = Tile.Emp;
-                Tile invalid2 = Tile.Emp;
+                TileType invalid1 = TileType.Emp;
+                TileType invalid2 = TileType.Emp;
                 //This checks that we are at least on the third tile to the right and there's a 2-match to the left
                 if (i % cols > 1 && this[i - 1] == this[i - 2 ])
                 {
@@ -178,7 +179,7 @@ namespace gdd2xna
                 {
                     invalid2 = this[i - cols];
                 }
-                Tile next = RandomTile();
+                TileType next = RandomTile();
                 while(invalid1 == next || invalid2 == next)
                 {
                     next = RandomTile();
@@ -208,7 +209,7 @@ namespace gdd2xna
         {
             for (int i = 0; i < indeces.Length; i++)
             {
-                this[indeces[i]] = Tile.Emp;
+                this[indeces[i]] = TileType.Emp;
             }
         }
 
@@ -327,7 +328,7 @@ namespace gdd2xna
         {
             int length = 0;
             // We check here to see if the current tile is Empty, because if it is we ignore it for these checks
-            if (this[n] != Tile.Emp)
+            if (this[n] != TileType.Emp)
             {
                 length = 1;
                 for (int i = 1; i < rows - (n / cols); i++)
@@ -356,7 +357,7 @@ namespace gdd2xna
         {
             int length = 0;
             // We check here to see if the current tile is Empty, because if it is we ignore it for these checks
-            if (this[n] != Tile.Emp)
+            if (this[n] != TileType.Emp)
             {
                 length = 1;
                 for (int i = 1; i < cols - (n % cols); i++)
@@ -389,7 +390,7 @@ namespace gdd2xna
 
             for (int i = 0; i <= lowestEmp; i++)
             {
-                if (this[i] == Tile.Emp)
+                if (this[i] == TileType.Emp)
                     this[i] = RandomTile();
             }
         }
@@ -401,14 +402,14 @@ namespace gdd2xna
             {
                 //We'll do a check to make sure we aren't at the very top of the column
                 bool top = false;
-                while (this[i] == Tile.Emp && !top)
+                while (this[i] == TileType.Emp && !top)
                 {
                     top = true;
                     var cur = i;
                     var above = cur - cols;
                     while (cur > 0)
                     {
-                        if (this[cur] != Tile.Emp)
+                        if (this[cur] != TileType.Emp)
                             top = false;
 
                         this[cur] = this[above];
@@ -463,9 +464,9 @@ namespace gdd2xna
         }
 
         // Helper function for getting a random tile
-        public Tile RandomTile()
+        public TileType RandomTile()
         {
-            return (Tile)rnd.Next(1, Enum.GetNames(typeof(Tile)).Length);
+            return (TileType)rnd.Next(1, Enum.GetNames(typeof(TileType)).Length);
         }
 
         /// <summary>
@@ -506,7 +507,7 @@ namespace gdd2xna
                 for (int j = 0; j < cols; ++j)
                 {
                     tileTexture = createTileTexture(i, j);
-                    if (this[i, j] != Tile.Emp)
+                    if (this[i, j] != TileType.Emp)
                         sb.Draw(tileTexture, tileRect, tileColor);
                     else
                         sb.Draw(tileTexture, tileRect, new Color(0, 0, 0, 0));
@@ -539,28 +540,28 @@ namespace gdd2xna
 
             switch (this[x, y])
             {
-                case Tile.Emp:
+                case TileType.Emp:
                     t = main.HamSandwich;
                     break;
-                case Tile.Ora:
+                case TileType.Ora:
                     t = main.Carrot;
                     break;
-                case Tile.Gre:
+                case TileType.Gre:
                     t = main.Broccoli;
                     break;
-                case Tile.Pur:
+                case TileType.Pur:
                     t = main.Eggplant;
                     break;
-                case Tile.Red:
+                case TileType.Red:
                     t = main.Tomato;
                     break;
-                case Tile.Yel:
+                case TileType.Yel:
                     t = main.Corn;
                     break;
-                case Tile.Pnk:
+                case TileType.Pnk:
                     t = main.Radish;
                     break;
-                case Tile.Wht:
+                case TileType.Wht:
                     t = main.Onion;
                     break;
                 default:

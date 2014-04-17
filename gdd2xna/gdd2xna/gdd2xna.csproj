@@ -83,6 +83,7 @@
     <Compile Include="src\Input.cs" />
     <Compile Include="src\Program.cs" />
     <Compile Include="src\Game1.cs" />
+    <Compile Include="Tile.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Game.ico" />

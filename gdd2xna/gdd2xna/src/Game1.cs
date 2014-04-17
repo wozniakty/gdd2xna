@@ -159,7 +159,7 @@ namespace gdd2xna
                                     foreach (var i in match)
                                     {
                                         Console.Write(grid[i] + ",");
-                                        grid[i] = Tile.Emp;
+                                        grid[i] = TileType.Emp;
                                     }
                                     Console.WriteLine();
                                 }
