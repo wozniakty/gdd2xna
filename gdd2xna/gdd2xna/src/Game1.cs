@@ -162,7 +162,7 @@ namespace gdd2xna
                                     foreach (var i in match)
                                     {
                                         Console.Write(grid[i] + ",");
-                                        grid[i] = TileType.Emp;
+                                        grid[i] = default(Tile);
                                     }
                                     Console.WriteLine();
                                 }

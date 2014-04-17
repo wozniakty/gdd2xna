@@ -37,7 +37,7 @@ namespace gdd2xna
         private Point position;
         public int[] selection;
         public int rows, cols;
-        private TileType[,] state;
+        private Tile[,] state;
         public Random rnd;
         private Game1 main;
 
@@ -52,28 +52,30 @@ namespace gdd2xna
 
             rows = r;
             cols = c;
-            gridRect.Width = c * TILE_SIZE;
-            gridRect.Height = r * TILE_SIZE;
+            gridRect.Width = c * (TILE_SIZE + 2);
+            gridRect.Height = r * (TILE_SIZE + 2);
             gridRect.X = x;
             gridRect.Y = y;
             
 
-            state = new TileType[r, c];
-            for( int i = 0; i < r * c; i++ )
-            {
-                this[i] = RandomTile();
-            }
+            state = new Tile[r, c];
+            for( int i = 0; i < r; i++ )
+                for (int j = 0; j < c; ++j)
+                {
+                    var t = RandomTile();
+                    this[i,j] = new Tile(i,j,t);
+                }
             selection = new int[2] { -1, -1 };
 
             Regenerate();
         }
         #region accessors
-        public TileType this[int r, int c]
+        public Tile this[int r, int c]
         {
             get 
             {
                 if (r < 0 || c < 0 || r >= rows || c >= cols)
-                    return TileType.Emp;
+                    return default(Tile);
                 return state[r, c]; 
             }
             set 
@@ -82,12 +84,12 @@ namespace gdd2xna
             }
         }
 
-        public TileType this[int n]
+        public Tile this[int n]
         {
             get 
             {
                 if (n < 0 || n > rows * cols - 1)
-                    return TileType.Emp;
+                    return default(Tile);
                 return state[n / cols,n % cols];
             }
             set 
@@ -97,9 +99,9 @@ namespace gdd2xna
             }
         }
 
-        public TileType[] GetRow(int r)
+        public Tile[] GetRow(int r)
         {
-            TileType[] row = new TileType[cols];
+            Tile[] row = new Tile[cols];
             for (int i = 0; i < cols; i++)
             {
                 row[i] = state[r, i];
@@ -107,9 +109,9 @@ namespace gdd2xna
             return row;
         }
 
-        public TileType[] GetCol(int c)
+        public Tile[] GetCol(int c)
         {
-            TileType[] col = new TileType[rows];
+            Tile[] col = new Tile[rows];
             for (int i = 0; i < cols; i++)
             {
                 col[i] = state[i, c];
@@ -166,10 +168,11 @@ namespace gdd2xna
         /// </summary>
         public void Regenerate()
         {
+            int y = 0;
             for (int i = 0; i < rows * cols; i++)
             {
-                TileType invalid1 = TileType.Emp;
-                TileType invalid2 = TileType.Emp;
+                Tile invalid1 = default(Tile);
+                Tile invalid2 = default(Tile);
                 //This checks that we are at least on the third tile to the right and there's a 2-match to the left
                 if (i % cols > 1 && this[i - 1] == this[i - 2 ])
                 {
@@ -180,12 +183,15 @@ namespace gdd2xna
                     invalid2 = this[i - cols];
                 }
                 TileType next = RandomTile();
-                while(invalid1 == next || invalid2 == next)
+                while(invalid1.type == next || invalid2.type == next)
                 {
                     next = RandomTile();
                 }
 
-                this[i] = next;
+                if (i % cols == 0) ++y;
+
+                var t = new Tile(i % cols, y, next);
+                this[i] = t;
             }
         }
 
@@ -209,7 +215,7 @@ namespace gdd2xna
         {
             for (int i = 0; i < indeces.Length; i++)
             {
-                this[indeces[i]] = TileType.Emp;
+                this[indeces[i]] = default(Tile);
             }
         }
 
@@ -328,7 +334,7 @@ namespace gdd2xna
         {
             int length = 0;
             // We check here to see if the current tile is Empty, because if it is we ignore it for these checks
-            if (this[n] != TileType.Emp)
+            if (this[n] != default(Tile))
             {
                 length = 1;
                 for (int i = 1; i < rows - (n / cols); i++)
@@ -357,7 +363,7 @@ namespace gdd2xna
         {
             int length = 0;
             // We check here to see if the current tile is Empty, because if it is we ignore it for these checks
-            if (this[n] != TileType.Emp)
+            if (this[n] != default(Tile))
             {
                 length = 1;
                 for (int i = 1; i < cols - (n % cols); i++)
@@ -387,11 +393,16 @@ namespace gdd2xna
             //Store the lowest empty tile, which will help us optimize at the end
             if (lowestEmp < 0)
                 lowestEmp = DropEmpties();
-
+            int y = 0;
             for (int i = 0; i <= lowestEmp; i++)
             {
-                if (this[i] == TileType.Emp)
-                    this[i] = RandomTile();
+                if (this[i] == default(Tile))
+                {
+                    var t = RandomTile();
+                    this[i] = new Tile(i % cols, y, t);
+                }
+
+                if (i % cols == 0) ++y;
             }
         }
 
@@ -402,14 +413,14 @@ namespace gdd2xna
             {
                 //We'll do a check to make sure we aren't at the very top of the column
                 bool top = false;
-                while (this[i] == TileType.Emp && !top)
+                while (this[i] == default(Tile) && !top)
                 {
                     top = true;
                     var cur = i;
                     var above = cur - cols;
                     while (cur > 0)
                     {
-                        if (this[cur] != TileType.Emp)
+                        if (this[cur] != default(Tile))
                             top = false;
 
                         this[cur] = this[above];
@@ -433,29 +444,29 @@ namespace gdd2xna
             {
                 for (int j = 0; j < cols; j++)
                 {
-                    if (this[i, j] == this[i, j + 2] &&
-                        (this[i, j] == this[i - 1, j + 1] ||
-                        this[i, j] == this[i + 1, j + 1]))
+                    if (this[i, j].type == this[i, j + 2].type &&
+                        (this[i, j].type == this[i - 1, j + 1].type ||
+                        this[i, j].type == this[i + 1, j + 1].type))
                             return false;
-                    if (this[i, j] == this[i + 2, j] &&
-                        (this[i,j] == this[i + 1,j-1] ||
-                        this[i,j] == this[i+1,j+1]))
+                    if (this[i, j].type == this[i + 2, j].type &&
+                        (this[i,j].type == this[i + 1,j-1].type ||
+                        this[i,j].type == this[i+1,j+1].type))
                             return false;
-                    if (this[i, j] == this[i, j + 1] &&
-                        (this[i, j] == this[i - 1, j - 1] ||
-                        this[i, j] == this[i, j - 2] ||
-                        this[i, j] == this[i + 1, j - 1] ||
-                        this[i, j] == this[i + 1, j + 2] ||
-                        this[i, j] == this[i, j + 3] ||
-                        this[i, j] == this[i - 1, j + 2]))
+                    if (this[i, j].type == this[i, j + 1].type &&
+                        (this[i, j].type == this[i - 1, j - 1].type ||
+                        this[i, j].type == this[i, j - 2].type ||
+                        this[i, j].type == this[i + 1, j - 1].type ||
+                        this[i, j].type == this[i + 1, j + 2].type ||
+                        this[i, j].type == this[i, j + 3].type ||
+                        this[i, j].type == this[i - 1, j + 2].type))
                             return false;
-                    if(this[i,j] == this[i+1,j] &&
-                        (this[i,j] == this[i-2,j] ||
-                        this[i,j] == this[i-1,j-1] ||
-                        this[i,j] == this[i+2,j-1] ||
-                        this[i,j] == this[i+3,j] ||
-                        this[i,j] == this[i+2,j+1] ||
-                        this[i,j] == this[i-1,j+1]))
+                    if(this[i,j].type == this[i+1,j].type &&
+                        (this[i,j].type == this[i-2,j].type ||
+                        this[i,j].type == this[i-1,j-1].type ||
+                        this[i,j].type == this[i+2,j-1].type ||
+                        this[i,j].type == this[i+3,j].type ||
+                        this[i,j].type == this[i+2,j+1].type ||
+                        this[i,j].type == this[i-1,j+1].type))
                             return false;
                 }
             }
@@ -522,7 +533,6 @@ namespace gdd2xna
             //draw the board
             sb.Draw(main.Grid_Art, gridRect, Color.White);
             //draw the tiles
-            var tileRect = new Rectangle(gridRect.X, gridRect.Y, Grid.TILE_SIZE, Grid.TILE_SIZE);
             var tileTexture = new Texture2D(main.GraphicsDevice, Grid.TILE_SIZE, Grid.TILE_SIZE);
             var tileColor = new Color();
             tileColor = Color.White;
@@ -530,8 +540,9 @@ namespace gdd2xna
             {
                 for (int j = 0; j < cols; ++j)
                 {
-                    tileTexture = createTileTexture(i, j);
-                    if (this[i, j] != TileType.Emp)
+                    tileTexture = createTileTexture(this[i, j].type);
+                    var tileRect = new Rectangle((int)(this[i,j].ScreenPosition.x +.5), (int)(this[i,j].ScreenPosition.y +.5), Grid.TILE_SIZE, Grid.TILE_SIZE); 
+                    if (this[i, j] != default(Tile))
                         sb.Draw(tileTexture, tileRect, tileColor);
                     else
                         sb.Draw(tileTexture, tileRect, new Color(0, 0, 0, 0));
@@ -541,19 +552,11 @@ namespace gdd2xna
                         main.DrawBorder(sb, tileRect, 3, Color.White);
                     }
 
-                    //move the rectangle
-                    var temp = tileRect;
-                    temp.X += Grid.TILE_SIZE;
-                    tileRect = temp;
                 }
-                var tempy = tileRect;
-                tempy.Y += Grid.TILE_SIZE;
-                tempy.X = gridRect.X;
-                tileRect = tempy;
             }
         }
 
-        private Texture2D createTileTexture(int x, int y)
+        private Texture2D createTileTexture(TileType type)
         {
             Texture2D t;
 
@@ -562,7 +565,7 @@ namespace gdd2xna
              * in switch statement    *
              * ************************/
 
-            switch (this[x, y])
+            switch (type)
             {
                 case TileType.Emp:
                     t = main.HamSandwich;

@@ -12,7 +12,7 @@ using Microsoft.Xna.Framework.Media;
 
 namespace gdd2xna
 {
-    struct float2
+    public struct float2
     {
         public float x;
         public float y;
@@ -41,13 +41,13 @@ namespace gdd2xna
         }
         
     }
-    struct Tile
+    public struct Tile
     {
         public float2 SPEED;
         private bool animating;
         private float2 realPosition;
         private Point targetPosition;
-
+        public TileType type;
 
         public void update()
         {
@@ -75,13 +75,15 @@ namespace gdd2xna
             }
 
         }
+
         //accessors and shit
 
-        public Tile(int x, int y)
+        public Tile(int x, int y, TileType t)
         {
+            type = t;
             animating = false;
-            realPosition = new float2(x, y);
-            targetPosition = new Point(x, y);
+            realPosition = new float2(x * 50 + 50, y * 50);
+            targetPosition = new Point(x * 50 + 50, y * 50);
             SPEED = new float2(.02f, .02f);
         }
 
@@ -103,6 +105,16 @@ namespace gdd2xna
         public bool Animating
         {
             get { return Animating; }
+        }
+
+        public static bool operator==(Tile thing, Tile other)
+        {
+            return thing.realPosition == other.realPosition && thing.targetPosition == other.targetPosition;
+        }
+
+        public static bool operator !=(Tile thing, Tile other)
+        {
+            return !(thing == other);
         }
     }
 }
