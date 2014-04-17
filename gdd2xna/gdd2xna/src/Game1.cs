@@ -150,7 +150,10 @@ namespace gdd2xna
 
                             var matches = grid.FindMatches();
 
-                            if (matches.Count == 0) grid.Swap(selectNum, gridNum);
+                            if (matches.Count == 0) 
+                                grid.Swap(selectNum, gridNum);
+                            else
+                                soundManager.Play(SoundEffectName.Match3);
 
                             while (matches.Count > 0)
                             {
