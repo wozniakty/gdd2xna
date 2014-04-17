@@ -173,8 +173,11 @@ namespace gdd2xna
 
                             Console.WriteLine();
                             grid.ClearSelection();
-                            if (grid.Deadlocked())
-                                Console.WriteLine("SORRY, it's deadlocked and we don't have a solution for that yet...");
+                            while(grid.Deadlocked())
+                            {
+                                grid.ShuffleBoard();
+                                Console.WriteLine("DEADLOCKED");
+                            }
                         }
                         else
                         {

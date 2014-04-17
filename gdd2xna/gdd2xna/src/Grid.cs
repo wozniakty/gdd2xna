@@ -462,6 +462,30 @@ namespace gdd2xna
             return true;
         }
 
+        /// <summary>
+        /// Shuffle dat board
+        /// </summary>
+        public void ShuffleBoard()
+        {
+            for (int i = 0; i < rows; i++)
+            {
+                for (int j = 0; j < cols; j++)
+                {
+                    int r = rnd.Next(0,cols);
+                    Swap(RCtoN(i, j), RCtoN(i, r));
+                }
+            }
+
+            for (int i = 0; i < cols; i++)
+            {
+                for (int j = 0; j < rows; j++)
+                {
+                    int r = rnd.Next(0, rows);
+                    Swap(RCtoN(j, i), RCtoN(r, i));
+                }
+            }
+        }
+
         // Helper function for getting a random tile
         public Tile RandomTile()
         {
