@@ -76,6 +76,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Audio\MusicManager.cs" />
+    <Compile Include="Audio\SoundEffectName.cs" />
     <Compile Include="Audio\SoundManager.cs" />
     <Compile Include="src\Grid.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
