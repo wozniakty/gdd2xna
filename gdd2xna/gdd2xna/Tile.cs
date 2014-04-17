@@ -95,6 +95,11 @@ namespace gdd2xna
             }
         }
 
+        public float2 ScreenPosition
+        {
+            get { return realPosition; }
+        }
+
         public bool Animating
         {
             get { return Animating; }
