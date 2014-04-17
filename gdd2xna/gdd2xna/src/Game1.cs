@@ -126,6 +126,7 @@ namespace gdd2xna
 
             musicManager.Update(gameTime);
             Input.Update();
+            
             if (state == GameState.Input)
             {
 
