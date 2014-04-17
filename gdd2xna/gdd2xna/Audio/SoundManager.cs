@@ -8,6 +8,19 @@ using System.IO;
 
 namespace gdd2xna
 {
+    /// <summary>
+    /// Instructions on adding new sound effects:
+    /// The code will try to load a sound effect for every different sound effect in gdd2xnaContent/Sound/SoundInfo.txt
+    /// Each line of SoundInfo.txt without a * in it contains the filename and the SoundEffectName and a "." between them
+    ///     The filename is the name of the file in gdd2xnaContent/Sound
+    ///     The SoundEffectName has to be one of the values in the SoundEffectName enum
+    ///         Add more to the SoundEffectName enum if you want to make a new type of sound effect
+    /// Add in your audio file to Content/Sound and then modify SoundInfo.txt to reflect the addition
+    ///     if you are only changing which audio file is assigned to a SoundEffectName, only change the filename
+    ///     if you are adding a new sound effect, add a new line with the file name and the name of the sound effect, and then Modify SoundEffectName.cs accordingly
+    /// 
+    /// Call soundManager.Play(yoursoundeffectname) wherever in the code you want the sound to play
+    /// </summary>
     class SoundManager
     {
         #region instance variables
@@ -22,9 +35,12 @@ namespace gdd2xna
         public SoundManager(Game g)
         {
             this.game = g;
-            GetSoundInfo();
         }
 
+        /// <summary>
+        /// Call this from anywhere else in the code as Game1.soundManager.Play(name)
+        /// </summary>
+        /// <param name="name">The name of the SoundEffect, from the SoundEffectName enum</param>
         public void Play(SoundEffectName name)
         {
             int i = 0;

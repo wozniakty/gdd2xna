@@ -135,7 +135,7 @@ namespace gdd2xna
                     var mousePos = Input.MousePos();
                     var gridPos = grid.ScreenToGrid(mousePos.X, mousePos.Y);
                     var gridNum = grid.RCtoN(gridPos[0], gridPos[1]);
-
+                    soundManager.Play(SoundEffectName.Match3);
                     if (!grid.HasActiveSelection())
                     {
                         grid.UpdateSelection(gridPos[0], gridPos[1]);
@@ -150,7 +150,10 @@ namespace gdd2xna
 
                             var matches = grid.FindMatches();
 
-                            if (matches.Count == 0) grid.Swap(selectNum, gridNum);
+                            if (matches.Count == 0) 
+                                grid.Swap(selectNum, gridNum);
+                            else
+                                soundManager.Play(SoundEffectName.Match3);
 
                             while (matches.Count > 0)
                             {
@@ -170,8 +173,11 @@ namespace gdd2xna
 
                             Console.WriteLine();
                             grid.ClearSelection();
-                            if (grid.Deadlocked())
-                                Console.WriteLine("SORRY, it's deadlocked and we don't have a solution for that yet...");
+                            while(grid.Deadlocked())
+                            {
+                                grid.ShuffleBoard();
+                                Console.WriteLine("DEADLOCKED");
+                            }
                         }
                         else
                         {
