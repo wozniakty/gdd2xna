@@ -134,7 +134,7 @@ namespace gdd2xna
                     var mousePos = Input.MousePos();
                     var gridPos = grid.ScreenToGrid(mousePos.X, mousePos.Y);
                     var gridNum = grid.RCtoN(gridPos[0], gridPos[1]);
-
+                    soundManager.Play(SoundEffectName.Match3);
                     if (!grid.HasActiveSelection())
                     {
                         grid.UpdateSelection(gridPos[0], gridPos[1]);

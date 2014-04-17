@@ -22,7 +22,6 @@ namespace gdd2xna
         public SoundManager(Game g)
         {
             this.game = g;
-            GetSoundInfo();
         }
 
         public void Play(SoundEffectName name)
