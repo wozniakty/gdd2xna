@@ -28,6 +28,7 @@ namespace gdd2xna
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         MusicManager musicManager;
+        SoundManager soundManager;
         public Texture2D HamSandwich;
         public Texture2D Broccoli;
         public Texture2D Carrot;
@@ -57,6 +58,7 @@ namespace gdd2xna
         {
             graphics = new GraphicsDeviceManager(this);
             musicManager = new MusicManager(this);
+            soundManager = new SoundManager(this);
             Content.RootDirectory = "Content";
         }
 
@@ -72,6 +74,7 @@ namespace gdd2xna
             // load songs to musicManager and play
             musicManager.Initialize();
             musicOn = true;
+            soundManager.Initialize();
             grid = new Grid(8, 8, 50, 50, this);
             state = GameState.Input;
 

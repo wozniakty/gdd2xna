@@ -40,6 +40,11 @@ namespace gdd2xna
             }
             if (played == false) throw new Exception("SoundManager asked to play SoundEffect that does not exist");
         }
+
+        public void Initialize()
+        {
+            GetSoundInfo();
+        }
         #endregion
 
         #region internal
