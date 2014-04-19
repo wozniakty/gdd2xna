@@ -15,7 +15,16 @@ namespace gdd2xna
     {
         Menu,
         Animate, // Board should animate and disallow input
-        Input // Board should allow input
+        Play // Board should allow input
+    }
+
+    public enum GameSteps
+    {
+        Input,
+        SwapBack,
+        CheckMatch,
+        DropBoard,
+        FillBoard
     }
 
 
