@@ -33,7 +33,7 @@ namespace gdd2xna
     {
         
         private Rectangle gridRect;
-        public const int TILE_SIZE = 48;
+        public static readonly int TILE_SIZE = 48;
         private Point position;
         public int[] selection;
         public int rows, cols;
@@ -402,7 +402,8 @@ namespace gdd2xna
                 if (this[i].type == TileType.Emp)
                 {
                     var t = RandomTile();
-                    this[i] = new Tile(i % cols, y, t);
+                    this[i] = new Tile(i % cols, -rows + y, t);
+                    this[i].Position = new Point(i % cols, y);
                 }
 
                 if (i % cols == 0) ++y;

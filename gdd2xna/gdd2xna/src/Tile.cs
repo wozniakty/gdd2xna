@@ -56,9 +56,9 @@ namespace gdd2xna
             //get dist info
             var yDist = realPosition.y - targetPosition.Y;
             var xDist = realPosition.x - targetPosition.X;
-            var tDistSq = (yDist * yDist) + (xDist + xDist);
+            var tDistSq = (yDist * yDist) + (xDist * xDist);
             //if close, we're done
-            if (tDistSq < (SPEED.x * SPEED.x) + (SPEED.y + SPEED.y))
+            if (tDistSq < (SPEED.x * SPEED.x) + (SPEED.y * SPEED.y))
             {
                 animating = false;
                 realPosition.y = targetPosition.X;
@@ -71,6 +71,8 @@ namespace gdd2xna
                 var vec = new float2(SPEED);
                 if (yDist > 0) vec.y *= -1;
                 if (xDist > 0) vec.x *= -1;
+                if (yDist == 0) vec.y = 0;
+                if (xDist == 0) vec.x = 0;
                 realPosition = realPosition + vec;
             }
 
@@ -82,9 +84,9 @@ namespace gdd2xna
         {
             type = t;
             animating = false;
-            realPosition = new float2(x * 50 + 50, y * 50);
-            targetPosition = new Point(x * 50 + 50, y * 50);
-            SPEED = new float2(.02f, .02f);
+            realPosition = new float2(x * Grid.TILE_SIZE + 50, y * Grid.TILE_SIZE);
+            targetPosition = new Point(x * Grid.TILE_SIZE + 50, y * Grid.TILE_SIZE);
+            SPEED = new float2(1f, 1f);
         }
 
         public Point Position

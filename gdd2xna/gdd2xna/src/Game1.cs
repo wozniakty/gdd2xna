@@ -18,13 +18,13 @@ namespace gdd2xna
         Input // Board should allow input
     }
 
-    public enum GameSteps
+    public enum GameStep
     {
         Input,
         SwapBack,
         CheckMatch,
-        DropBoard,
-        FillBoard
+        FillBoard,
+        CheckDeadlock
     }
 
 
@@ -51,7 +51,9 @@ namespace gdd2xna
         private bool musicOn;
 
         private Grid grid;
-        public GameState state;
+        public GameStep step;
+        int[] prevSwap;
+        int lowestEmp = 0;
 
         #endregion
 
@@ -85,8 +87,8 @@ namespace gdd2xna
             musicOn = true;
             soundManager.Initialize();
             grid = new Grid(8, 8, 50, 50, this);
-            state = GameState.Input;
-
+            step = GameStep.Input;
+            prevSwap = new int[2] { 0, 0 };
             base.Initialize();
         }
 
@@ -133,66 +135,84 @@ namespace gdd2xna
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
 
-            musicManager.Update(gameTime);
+            //musicManager.Update(gameTime);
             Input.Update();
-            
-            if (state == GameState.Input && !grid.Animating())
-            {
 
-                if (Input.LeftClick())
+            if (!grid.Animating())
+            {
+                if(step == GameStep.Input)
                 {
-                    var mousePos = Input.MousePos();
-                    var gridPos = grid.ScreenToGrid(mousePos.X, mousePos.Y);
-                    var gridNum = grid.RCtoN(gridPos[0], gridPos[1]);
-                    soundManager.Play(SoundEffectName.Match3);
-                    if (!grid.HasActiveSelection())
+                        if (Input.LeftClick())
+                        {
+                            var mousePos = Input.MousePos();
+                            var gridPos = grid.ScreenToGrid(mousePos.X, mousePos.Y);
+                            var gridNum = grid.RCtoN(gridPos[0], gridPos[1]);
+                            soundManager.Play(SoundEffectName.Match3);
+                            if (!grid.HasActiveSelection())
+                            {
+                                grid.UpdateSelection(gridPos[0], gridPos[1]);
+                            }
+                            else
+                            {
+                                var selectNum = grid.RCtoN(grid.selection[0], grid.selection[1]);
+                                var swaps = grid.GetSwaps(selectNum);
+                                if (swaps.Contains(gridNum))
+                                {
+                                    grid.Swap(selectNum, gridNum);
+                                    prevSwap[0] = selectNum;
+                                    prevSwap[1] = gridNum;
+                                    grid.ClearSelection();
+                                    step = GameStep.CheckMatch;
+                                }
+                                else
+                                {
+                                    grid.UpdateSelection(gridPos[0], gridPos[1]);
+                                }
+                            }
+                        }
+                }
+                else if (step == GameStep.CheckMatch)
+                {
+                    var matches = grid.FindMatches();
+                    if (matches.Count == 0)
                     {
-                        grid.UpdateSelection(gridPos[0], gridPos[1]);
+                        grid.Swap(prevSwap[0], prevSwap[1]);
+                        step = GameStep.Input;
                     }
                     else
                     {
-                        var selectNum = grid.RCtoN(grid.selection[0], grid.selection[1]);
-                        var swaps = grid.GetSwaps(selectNum);
-                        if (swaps.Contains(gridNum))
+                        foreach (var match in matches)
                         {
-                            grid.Swap(selectNum, gridNum);
-
-                            var matches = grid.FindMatches();
-
-                            if (matches.Count == 0) 
-                                grid.Swap(selectNum, gridNum);
-                            else
-                                soundManager.Play(SoundEffectName.Match3);
-
-                            while (matches.Count > 0)
-                            {
-                                foreach (var match in matches)
-                                {
-                                    foreach (var i in match)
-                                    {
-                                        Console.Write(grid[i] + ",");
-                                        grid[i].type = TileType.Emp;
-                                    }
-                                    Console.WriteLine();
-                                }
-
-                                grid.RefillBoard();
-                                matches = grid.FindMatches();
-                            }
-
-                            Console.WriteLine();
-                            grid.ClearSelection();
-                            while(grid.Deadlocked())
-                            {
-                                grid.ShuffleBoard();
-                                Console.WriteLine("DEADLOCKED");
-                            }
+                            grid.EmptyTiles(match);
                         }
-                        else
-                        {
-                            grid.UpdateSelection(gridPos[0], gridPos[1]);
-                        }
+                        lowestEmp = grid.DropEmpties();
+                        step = GameStep.FillBoard;
                     }
+                }
+                else if (step == GameStep.FillBoard)
+                {
+                    grid.RefillBoard(lowestEmp);
+                    if (grid.FindMatches().Count > 0)
+                        step = GameStep.CheckMatch;
+                    else
+                        step = GameStep.CheckDeadlock;
+                }
+                else if (step == GameStep.CheckDeadlock)
+                {
+                    if (grid.Deadlocked())
+                        grid.ShuffleBoard();
+                    else
+                    {
+                        step = GameStep.Input;
+                        grid.ClearSelection();
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < grid.rows * grid.cols; i++)
+                {
+                    grid[i].update();
                 }
             }
 
