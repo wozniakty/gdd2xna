@@ -71,7 +71,7 @@ namespace gdd2xna
             this.IsMouseVisible = true;
             // load songs to musicManager and play
             musicManager.Initialize();
-            musicOn = true;
+            musicOn = false;
             grid = new Grid(8, 8, 50, 50, this);
             state = GameState.Input;
 
