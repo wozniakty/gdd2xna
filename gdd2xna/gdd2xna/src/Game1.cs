@@ -28,6 +28,7 @@ namespace gdd2xna
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         MusicManager musicManager;
+        SoundManager soundManager;
         public Texture2D HamSandwich;
         public Texture2D Broccoli;
         public Texture2D Carrot;
@@ -57,6 +58,7 @@ namespace gdd2xna
         {
             graphics = new GraphicsDeviceManager(this);
             musicManager = new MusicManager(this);
+            soundManager = new SoundManager(this);
             Content.RootDirectory = "Content";
         }
 
@@ -71,7 +73,12 @@ namespace gdd2xna
             this.IsMouseVisible = true;
             // load songs to musicManager and play
             musicManager.Initialize();
+<<<<<<< HEAD
             musicOn = false;
+=======
+            musicOn = true;
+            soundManager.Initialize();
+>>>>>>> 21d194bc4e16604e9c4b0b7e7ebfb2bd42966413
             grid = new Grid(8, 8, 50, 50, this);
             state = GameState.Input;
 
@@ -123,6 +130,7 @@ namespace gdd2xna
 
             musicManager.Update(gameTime);
             Input.Update();
+            
             if (state == GameState.Input)
             {
 
@@ -131,7 +139,7 @@ namespace gdd2xna
                     var mousePos = Input.MousePos();
                     var gridPos = grid.ScreenToGrid(mousePos.X, mousePos.Y);
                     var gridNum = grid.RCtoN(gridPos[0], gridPos[1]);
-
+                    soundManager.Play(SoundEffectName.Match3);
                     if (!grid.HasActiveSelection())
                     {
                         grid.UpdateSelection(gridPos[0], gridPos[1]);
@@ -146,7 +154,10 @@ namespace gdd2xna
 
                             var matches = grid.FindMatches();
 
-                            if (matches.Count == 0) grid.Swap(selectNum, gridNum);
+                            if (matches.Count == 0) 
+                                grid.Swap(selectNum, gridNum);
+                            else
+                                soundManager.Play(SoundEffectName.Match3);
 
                             while (matches.Count > 0)
                             {
@@ -166,8 +177,11 @@ namespace gdd2xna
 
                             Console.WriteLine();
                             grid.ClearSelection();
-                            if (grid.Deadlocked())
-                                Console.WriteLine("SORRY, it's deadlocked and we don't have a solution for that yet...");
+                            while(grid.Deadlocked())
+                            {
+                                grid.ShuffleBoard();
+                                Console.WriteLine("DEADLOCKED");
+                            }
                         }
                         else
                         {

@@ -17,7 +17,7 @@ namespace gdd2xna
         #region instance variables
         private List<Song> songList = new List<Song>();
         private String ContentMusicPath = "Music//";
-        private String MusicInfoFileName = "../../../Audio/MusicInfo.txt";
+        private String MusicInfoFileName = "../../../../gdd2xnaContent/Music/MusicInfo.txt";
         private Game game;
         private bool canPlay;
         private Song currentSong;
@@ -27,7 +27,6 @@ namespace gdd2xna
 
         //relevent if you just want to start or stop the music from code outside this
         #region public methods
-
         /// <summary>
         /// Stops music from being played, if a song is playing, it isn't saved for when Play() is called
         /// </summary>
@@ -40,7 +39,7 @@ namespace gdd2xna
 
         /// <summary>
         /// Allows the class to play music
-        /// Does nothing music is already playing
+        /// Does nothing if music is already playing
         /// </summary>
         public void Play()
         {
@@ -152,6 +151,6 @@ namespace gdd2xna
         {
             if (instance != null) instance.Stop();
         }
-        #endregion
     }
+        #endregion
 }

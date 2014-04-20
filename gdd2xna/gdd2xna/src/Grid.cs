@@ -381,10 +381,22 @@ namespace gdd2xna
             return match;
         }
 
-        public void RefillBoard()
+        public void RefillBoard(int lowestEmp = -1)
         {
             //Store the lowest empty tile, which will help us optimize at the end
-            int lowestEmp = 0;
+            if (lowestEmp < 0)
+                lowestEmp = DropEmpties();
+
+            for (int i = 0; i <= lowestEmp; i++)
+            {
+                if (this[i] == Tile.Emp)
+                    this[i] = RandomTile();
+            }
+        }
+
+        public int DropEmpties()
+        {
+            var lowestEmp = 0;
             for (int i = rows * cols - 1; i >= 0; i--)
             {
                 //We'll do a check to make sure we aren't at the very top of the column
@@ -409,11 +421,7 @@ namespace gdd2xna
                 }
             }
 
-            for (int i = 0; i <= lowestEmp; i++)
-            {
-                if (this[i] == Tile.Emp)
-                    this[i] = RandomTile();
-            }
+            return lowestEmp;
         }
 
         // Returns true if there is no possible match
@@ -452,6 +460,30 @@ namespace gdd2xna
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Shuffle dat board
+        /// </summary>
+        public void ShuffleBoard()
+        {
+            for (int i = 0; i < rows; i++)
+            {
+                for (int j = 0; j < cols; j++)
+                {
+                    int r = rnd.Next(0,cols);
+                    Swap(RCtoN(i, j), RCtoN(i, r));
+                }
+            }
+
+            for (int i = 0; i < cols; i++)
+            {
+                for (int j = 0; j < rows; j++)
+                {
+                    int r = rnd.Next(0, rows);
+                    Swap(RCtoN(j, i), RCtoN(r, i));
+                }
+            }
         }
 
         // Helper function for getting a random tile
@@ -498,7 +530,11 @@ namespace gdd2xna
                 for (int j = 0; j < cols; ++j)
                 {
                     tileTexture = createTileTexture(i, j);
-                    sb.Draw(tileTexture, tileRect, tileColor);
+                    if (this[i, j] != Tile.Emp)
+                        sb.Draw(tileTexture, tileRect, tileColor);
+                    else
+                        sb.Draw(tileTexture, tileRect, new Color(0, 0, 0, 0));
+
                     if (selection[0] == i && selection[1]== j)
                     {
                         main.DrawBorder(sb, tileRect, 3, Color.White);
@@ -527,6 +563,9 @@ namespace gdd2xna
 
             switch (this[x, y])
             {
+                case Tile.Emp:
+                    t = main.HamSandwich;
+                    break;
                 case Tile.Ora:
                     t = main.Carrot;
                     break;
