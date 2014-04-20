@@ -75,7 +75,7 @@ namespace gdd2xna
             get 
             {
                 if (r < 0 || c < 0 || r >= rows || c >= cols)
-                    return default(Tile);
+                    return new Tile(-1, -1, TileType.Emp);
                 return state[r, c]; 
             }
             set 
@@ -89,7 +89,7 @@ namespace gdd2xna
             get 
             {
                 if (n < 0 || n > rows * cols - 1)
-                    return default(Tile);
+                    return new Tile(-1, -1, TileType.Emp);
                 return state[n / cols,n % cols];
             }
             set 
@@ -171,19 +171,19 @@ namespace gdd2xna
             int y = 0;
             for (int i = 0; i < rows * cols; i++)
             {
-                Tile invalid1 = default(Tile);
-                Tile invalid2 = default(Tile);
+                TileType invalid1 = TileType.Emp;
+                TileType invalid2 = TileType.Emp;
                 //This checks that we are at least on the third tile to the right and there's a 2-match to the left
-                if (i % cols > 1 && this[i - 1] == this[i - 2 ])
+                if (i % cols > 1 && this[i - 1].type == this[i - 2 ].type)
                 {
-                    invalid1 = this[i - 1];
+                    invalid1 = this[i - 1].type;
                 } //and this checks that we are at least on the third tile down
-                if(i / cols > 1 && this[i - cols] == this[i - 2*cols])
+                if(i / cols > 1 && this[i - cols].type == this[i - 2*cols].type)
                 {
-                    invalid2 = this[i - cols];
+                    invalid2 = this[i - cols].type;
                 }
                 TileType next = RandomTile();
-                while(invalid1.type == next || invalid2.type == next)
+                while(invalid1 == next || invalid2 == next)
                 {
                     next = RandomTile();
                 }
@@ -202,6 +202,9 @@ namespace gdd2xna
         /// <param name="n2"></param>
         public void Swap(int n1, int n2)
         {
+            var tempPos = this[n1].Position;
+            this[n1].Position = this[n2].Position;
+            this[n2].Position = tempPos;
             var temp = this[n1];
             this[n1] = this[n2];
             this[n2] = temp;
@@ -215,7 +218,7 @@ namespace gdd2xna
         {
             for (int i = 0; i < indeces.Length; i++)
             {
-                this[indeces[i]] = default(Tile);
+                this[indeces[i]].type = TileType.Emp;
             }
         }
 
@@ -334,12 +337,12 @@ namespace gdd2xna
         {
             int length = 0;
             // We check here to see if the current tile is Empty, because if it is we ignore it for these checks
-            if (this[n] != default(Tile))
+            if (this[n].type != TileType.Emp)
             {
                 length = 1;
                 for (int i = 1; i < rows - (n / cols); i++)
                 {
-                    if (this[n] == this[n + cols*i])
+                    if (this[n].type == this[n + cols * i].type)
                     {
                         length++;
                     }
@@ -363,12 +366,12 @@ namespace gdd2xna
         {
             int length = 0;
             // We check here to see if the current tile is Empty, because if it is we ignore it for these checks
-            if (this[n] != default(Tile))
+            if (this[n].type != TileType.Emp)
             {
                 length = 1;
                 for (int i = 1; i < cols - (n % cols); i++)
                 {
-                    if (this[n] == this[n + i])
+                    if (this[n].type == this[n + i].type)
                     {
                         length++;
                     }
@@ -396,7 +399,7 @@ namespace gdd2xna
             int y = 0;
             for (int i = 0; i <= lowestEmp; i++)
             {
-                if (this[i] == default(Tile))
+                if (this[i].type == TileType.Emp)
                 {
                     var t = RandomTile();
                     this[i] = new Tile(i % cols, y, t);
@@ -413,17 +416,17 @@ namespace gdd2xna
             {
                 //We'll do a check to make sure we aren't at the very top of the column
                 bool top = false;
-                while (this[i] == default(Tile) && !top)
+                while (this[i].type == TileType.Emp && !top)
                 {
                     top = true;
                     var cur = i;
                     var above = cur - cols;
                     while (cur > 0)
                     {
-                        if (this[cur] != default(Tile))
+                        if (this[cur].type != TileType.Emp)
                             top = false;
 
-                        this[cur] = this[above];
+                        Swap(cur, above );
                         cur = above;
                         above = cur - cols;
                     }
@@ -434,6 +437,17 @@ namespace gdd2xna
             }
 
             return lowestEmp;
+        }
+
+        public bool Animating()
+        {
+            for (int i = 0; i < rows * cols; i++)
+            {
+                if (this[i].Animating)
+                    return true;
+            }
+
+            return false;
         }
 
         // Returns true if there is no possible match
@@ -519,6 +533,11 @@ namespace gdd2xna
             return new int[2] { -1, -1 };
         }
 
+        public int[] GridToScreen(int X, int Y)
+        {
+            return new int[2]{ ( Y * TILE_SIZE ) + gridRect.Y, ( X * TILE_SIZE ) + gridRect.X };
+        }
+
         public int RCtoN(int row, int col)
         {
             return (row * cols) + col;
@@ -542,7 +561,7 @@ namespace gdd2xna
                 {
                     tileTexture = createTileTexture(this[i, j].type);
                     var tileRect = new Rectangle((int)(this[i,j].ScreenPosition.x +.5), (int)(this[i,j].ScreenPosition.y +.5), Grid.TILE_SIZE, Grid.TILE_SIZE); 
-                    if (this[i, j] != default(Tile))
+                    if (this[i, j].type != TileType.Emp)
                         sb.Draw(tileTexture, tileRect, tileColor);
                     else
                         sb.Draw(tileTexture, tileRect, new Color(0, 0, 0, 0));

@@ -41,7 +41,7 @@ namespace gdd2xna
         }
         
     }
-    public struct Tile
+    public class Tile
     {
         public float2 SPEED;
         private bool animating;
@@ -104,7 +104,7 @@ namespace gdd2xna
 
         public bool Animating
         {
-            get { return Animating; }
+            get { return animating; }
         }
 
         public static bool operator==(Tile thing, Tile other)

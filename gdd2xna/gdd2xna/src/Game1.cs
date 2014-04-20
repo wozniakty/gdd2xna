@@ -15,7 +15,7 @@ namespace gdd2xna
     {
         Menu,
         Animate, // Board should animate and disallow input
-        Play // Board should allow input
+        Input // Board should allow input
     }
 
     public enum GameSteps
@@ -136,7 +136,7 @@ namespace gdd2xna
             musicManager.Update(gameTime);
             Input.Update();
             
-            if (state == GameState.Input)
+            if (state == GameState.Input && !grid.Animating())
             {
 
                 if (Input.LeftClick())
@@ -171,7 +171,7 @@ namespace gdd2xna
                                     foreach (var i in match)
                                     {
                                         Console.Write(grid[i] + ",");
-                                        grid[i] = default(Tile);
+                                        grid[i].type = TileType.Emp;
                                     }
                                     Console.WriteLine();
                                 }
