@@ -48,6 +48,7 @@ namespace gdd2xna
         private float2 realPosition;
         private Point targetPosition;
         public TileType type;
+        public Grid container;
 
         public void update()
         {
@@ -61,8 +62,8 @@ namespace gdd2xna
             if (tDistSq < (SPEED.x * SPEED.x) + (SPEED.y * SPEED.y))
             {
                 animating = false;
-                realPosition.y = targetPosition.X;
-                realPosition.x = targetPosition.Y;
+                realPosition.y = targetPosition.Y;
+                realPosition.x = targetPosition.X;
                 return;
             }
             //move a bitch
@@ -80,13 +81,14 @@ namespace gdd2xna
 
         //accessors and shit
 
-        public Tile(int x, int y, TileType t)
+        public Tile(int x, int y, TileType t, Grid c)
         {
+            container = c;
             type = t;
             animating = false;
-            realPosition = new float2(x * Grid.TILE_SIZE + 50, y * Grid.TILE_SIZE);
-            targetPosition = new Point(x * Grid.TILE_SIZE + 50, y * Grid.TILE_SIZE);
-            SPEED = new float2(1f, 1f);
+            realPosition = new float2(x * Grid.TILE_SIZE + container.rect.Left, y * Grid.TILE_SIZE + container.rect.Top );
+            targetPosition = new Point(x * Grid.TILE_SIZE + container.rect.Left, y * Grid.TILE_SIZE + container.rect.Top);
+            SPEED = new float2(2f, 2f);
         }
 
         public Point Position

@@ -33,7 +33,7 @@ namespace gdd2xna
     {
         
         private Rectangle gridRect;
-        public static readonly int TILE_SIZE = 48;
+        public static readonly int TILE_SIZE = 50;
         private Point position;
         public int[] selection;
         public int rows, cols;
@@ -52,8 +52,8 @@ namespace gdd2xna
 
             rows = r;
             cols = c;
-            gridRect.Width = c * (TILE_SIZE + 2);
-            gridRect.Height = r * (TILE_SIZE + 2);
+            gridRect.Width = c * (TILE_SIZE);
+            gridRect.Height = r * (TILE_SIZE);
             gridRect.X = x;
             gridRect.Y = y;
             
@@ -63,7 +63,7 @@ namespace gdd2xna
                 for (int j = 0; j < c; ++j)
                 {
                     var t = RandomTile();
-                    this[i,j] = new Tile(i,j,t);
+                    this[i,j] = new Tile(i,j,t, this);
                 }
             selection = new int[2] { -1, -1 };
 
@@ -75,7 +75,7 @@ namespace gdd2xna
             get 
             {
                 if (r < 0 || c < 0 || r >= rows || c >= cols)
-                    return new Tile(-1, -1, TileType.Emp);
+                    return new Tile(-1, -1, TileType.Emp, this);
                 return state[r, c]; 
             }
             set 
@@ -89,7 +89,7 @@ namespace gdd2xna
             get 
             {
                 if (n < 0 || n > rows * cols - 1)
-                    return new Tile(-1, -1, TileType.Emp);
+                    return new Tile(-1, -1, TileType.Emp, this);
                 return state[n / cols,n % cols];
             }
             set 
@@ -190,7 +190,7 @@ namespace gdd2xna
 
                 if (i % cols == 0) ++y;
 
-                var t = new Tile(i % cols, y, next);
+                var t = new Tile(i % cols, y, next, this);
                 this[i] = t;
             }
         }
@@ -202,12 +202,14 @@ namespace gdd2xna
         /// <param name="n2"></param>
         public void Swap(int n1, int n2)
         {
-            var tempPos = this[n1].Position;
-            this[n1].Position = this[n2].Position;
-            this[n2].Position = tempPos;
-            var temp = this[n1];
-            this[n1] = this[n2];
-            this[n2] = temp;
+            var t1 = this[n1];
+            var t2 = this[n2];
+            var p1 = t1.Position;
+            t1.Position = t2.Position;
+            t2.Position = p1;
+
+            this[n2] = t1;
+            this[n1] = t2;
         }
 
         /// <summary>
@@ -395,18 +397,21 @@ namespace gdd2xna
         {
             //Store the lowest empty tile, which will help us optimize at the end
             if (lowestEmp < 0)
-                lowestEmp = DropEmpties();
-            int y = 0;
-            for (int i = 0; i <= lowestEmp; i++)
+                lowestEmp = DropEmpties();            
+            
+            int[] spot = new int[cols];
+            int y = lowestEmp / cols;
+            for (int i = lowestEmp; i >= 0; i--)
             {
                 if (this[i].type == TileType.Emp)
                 {
                     var t = RandomTile();
-                    this[i] = new Tile(i % cols, -rows + y, t);
-                    this[i].Position = new Point(i % cols, y);
+                    this[i] = new Tile(i % cols, spot[i % cols], t, this);
+                    spot[i % cols]--;
+                    this[i].Position = new Point(((i % cols) * Grid.TILE_SIZE) + rect.Left, ((y + 1) * Grid.TILE_SIZE) + rect.Top);
                 }
 
-                if (i % cols == 0) ++y;
+                if (i % cols == 0) --y;
             }
         }
 
@@ -561,7 +566,7 @@ namespace gdd2xna
                 for (int j = 0; j < cols; ++j)
                 {
                     tileTexture = createTileTexture(this[i, j].type);
-                    var tileRect = new Rectangle((int)(this[i,j].ScreenPosition.x +.5), (int)(this[i,j].ScreenPosition.y +.5), Grid.TILE_SIZE, Grid.TILE_SIZE); 
+                    var tileRect = new Rectangle((int)this[i,j].ScreenPosition.x,(int)this[i,j].ScreenPosition.y - Grid.TILE_SIZE, Grid.TILE_SIZE, Grid.TILE_SIZE); 
                     if (this[i, j].type != TileType.Emp)
                         sb.Draw(tileTexture, tileRect, tileColor);
                     else
