@@ -574,7 +574,6 @@ namespace gdd2xna
             //draw the board
             sb.Draw(main.Grid_Art, gridRect, Color.White);
             //draw the tiles
-            var tileTexture = new Texture2D(main.GraphicsDevice, Grid.TILE_SIZE, Grid.TILE_SIZE);
 
             var tileColor = new Color();
             tileColor = Color.White;
@@ -582,7 +581,7 @@ namespace gdd2xna
             {
                 for (int j = 0; j < cols; ++j)
                 {
-                    tileTexture = createTileTexture(this[i, j].type);
+                    var tileTexture = createTileTexture(this[i, j].type);
                     var tileRect = new Rectangle((int)this[i,j].ScreenPosition.x,(int)this[i,j].ScreenPosition.y - Grid.TILE_SIZE, Grid.TILE_SIZE, Grid.TILE_SIZE); 
                     if (this[i, j].type != TileType.Emp)
                         sb.Draw(tileTexture, tileRect, tileColor);
