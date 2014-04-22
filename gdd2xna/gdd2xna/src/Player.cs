@@ -17,7 +17,7 @@ namespace gdd2xna
         /// <summary>
         /// The locations to draw the grid at for each player.
         /// </summary>
-        private static readonly int[][] GRID_LOCATIONS = {new int[] {0, 0}, new int[] {400, 0}};
+        private static readonly int[][] GRID_LOCATIONS = {new int[] {100, 100}, new int[] {800, 100}};
 
         /// <summary>
         /// The game instance.

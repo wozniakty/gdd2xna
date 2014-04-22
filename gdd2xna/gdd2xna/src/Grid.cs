@@ -33,7 +33,7 @@ namespace gdd2xna
     {
         
         private Rectangle gridRect;
-        public static readonly int TILE_SIZE = 50;
+        public static readonly int TILE_SIZE = 84;
         private Point position;
         public int[] selection;
         public int rows, cols;
@@ -575,6 +575,7 @@ namespace gdd2xna
             sb.Draw(main.Grid_Art, gridRect, Color.White);
             //draw the tiles
             var tileTexture = new Texture2D(main.GraphicsDevice, Grid.TILE_SIZE, Grid.TILE_SIZE);
+
             var tileColor = new Color();
             tileColor = Color.White;
             for (int i = 0; i < rows; ++i)
@@ -599,8 +600,6 @@ namespace gdd2xna
 
         private Texture2D createTileTexture(TileType type)
         {
-            Texture2D t;
-
             /**************************
              * set texture to an asset*
              * in switch statement    *
@@ -609,34 +608,24 @@ namespace gdd2xna
             switch (type)
             {
                 case TileType.Emp:
-                    t = main.HamSandwich;
-                    break;
+                    return main.HamSandwich;
                 case TileType.Ora:
-                    t = main.Carrot;
-                    break;
+                    return main.Carrot;
                 case TileType.Gre:
-                    t = main.Broccoli;
-                    break;
+                    return main.Broccoli;
                 case TileType.Pur:
-                    t = main.Eggplant;
-                    break;
+                    return main.Eggplant;
                 case TileType.Red:
-                    t = main.Tomato;
-                    break;
+                    return main.Tomato;
                 case TileType.Yel:
-                    t = main.Corn;
-                    break;
+                    return main.Corn;
                 case TileType.Pnk:
-                    t = main.Radish;
-                    break;
+                    return main.Radish;
                 case TileType.Wht:
-                    t = main.Onion;
-                    break;
+                    return main.Onion;
                 default:
                     throw new Exception("Could not assign texture");
             }
-
-            return t;
         }
         #endregion
 

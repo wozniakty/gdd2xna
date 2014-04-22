@@ -71,6 +71,8 @@ namespace gdd2xna
             graphics = new GraphicsDeviceManager(this);
             musicManager = new MusicManager(this);
             soundManager = new SoundManager(this);
+            graphics.PreferredBackBufferHeight = 900;
+            graphics.PreferredBackBufferWidth = 1600;
             Content.RootDirectory = "Content";
 
             players = new Player[2];
