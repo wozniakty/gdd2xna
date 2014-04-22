@@ -23,7 +23,9 @@ namespace gdd2xna
         Input,
         SwapBack,
         CheckMatch,
-        CheckDeadlock
+        CheckDeadlock,
+        Waiting, 
+        Complete
     }
 
 
@@ -49,10 +51,10 @@ namespace gdd2xna
         public Texture2D Pixel;
         private bool musicOn;
 
-        private Grid grid;
-        public GameStep step;
-        int[] prevSwap;
-        int lowestEmp = 0;
+        /// <summary>
+        /// The array of players.
+        /// </summary>
+        private readonly Player[] players;
 
         #endregion
 
@@ -70,6 +72,13 @@ namespace gdd2xna
             musicManager = new MusicManager(this);
             soundManager = new SoundManager(this);
             Content.RootDirectory = "Content";
+
+            players = new Player[2];
+            for (int i = 0; i < players.Length; i++)
+            {
+                players[i] = new Player(this, i, soundManager);
+            }
+            players[0].step = GameStep.Input;
         }
 
         /// <summary>
@@ -85,9 +94,6 @@ namespace gdd2xna
             musicManager.Initialize();
             musicOn = true;
             soundManager.Initialize();
-            grid = new Grid(8, 8, 100, 50, this);
-            step = GameStep.Input;
-            prevSwap = new int[2] { 0, 0 };
             base.Initialize();
         }
 
@@ -134,80 +140,20 @@ namespace gdd2xna
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
 
-            //musicManager.Update(gameTime);
+            musicManager.Update(gameTime);
             Input.Update();
 
-            if (!grid.Animating())
+            // Update each of the players
+            foreach (Player next in players)
             {
-                if(step == GameStep.Input)
+                next.Update(gameTime);
+
+                // Check if the player has finished their turn.
+                if (next.step == GameStep.Complete)
                 {
-                        if (Input.LeftClick())
-                        {
-                            var mousePos = Input.MousePos();
-                            var gridPos = grid.ScreenToGrid(mousePos.X, mousePos.Y);
-                            var gridNum = grid.RCtoN(gridPos[0], gridPos[1]);
-                            soundManager.Play(SoundEffectName.Match3);
-                            if (!grid.HasActiveSelection())
-                            {
-                                grid.UpdateSelection(gridPos[0], gridPos[1]);
-                            }
-                            else
-                            {
-                                var selectNum = grid.RCtoN(grid.selection[0], grid.selection[1]);
-                                var swaps = grid.GetSwaps(selectNum);
-                                if (swaps.Contains(gridNum))
-                                {
-                                    grid.Swap(selectNum, gridNum);
-                                    prevSwap[0] = selectNum;
-                                    prevSwap[1] = gridNum;
-                                    grid.ClearSelection();
-                                    step = GameStep.CheckMatch;
-                                }
-                                else
-                                {
-                                    grid.UpdateSelection(gridPos[0], gridPos[1]);
-                                }
-                            }
-                        }
-                }
-                else if (step == GameStep.CheckMatch)
-                {
-                    var matches = grid.FindMatches();
-                    if (matches.Count == 0)
-                    {
-                        grid.Swap(prevSwap[0], prevSwap[1]);
-                        step = GameStep.Input;
-                    }
-                    else
-                    {
-                        foreach (var match in matches)
-                        {
-                            grid.EmptyTiles(match);
-                        }
-                        lowestEmp = grid.DropEmpties();
-                        grid.RefillBoard(lowestEmp);
-                        if (grid.FindMatches().Count > 0)
-                            step = GameStep.CheckMatch;
-                        else
-                            step = GameStep.CheckDeadlock;
-                    }
-                }
-                else if (step == GameStep.CheckDeadlock)
-                {
-                    if (grid.Deadlocked())
-                        grid.ShuffleBoard();
-                    else
-                    {
-                        step = GameStep.Input;
-                        grid.ClearSelection();
-                    }
-                }
-            }
-            else
-            {
-                for (int i = 0; i < grid.rows * grid.cols; i++)
-                {
-                    grid[i].update();
+                    // If so, activate the next player.
+                    next.step = GameStep.Waiting;
+                    players[(next.Index + 1) % players.Length].step = GameStep.Input;
                 }
             }
 
@@ -222,10 +168,13 @@ namespace gdd2xna
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            // TODO: Add your drawing code here
             spriteBatch.Begin();
 
-            grid.Draw(spriteBatch);
+            // Draw each of the players
+            foreach (Player next in players)
+            {
+                next.Draw(gameTime, spriteBatch);
+            }
 
             spriteBatch.End();
             base.Draw(gameTime);
