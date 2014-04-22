@@ -102,7 +102,7 @@ namespace gdd2xna
                 // add to time song has been playing (reset to zero when PlaySong() is called)
                 secondsSinceSongStart += gameTime.ElapsedGameTime.TotalSeconds;
                 // play first song or new song when sufficient time has passed
-                if (currentSong == null || secondsSinceSongStart >= currentSong.SecondsLength)
+                if ((currentSong == null || secondsSinceSongStart >= currentSong.SecondsLength) && songList.Count > 0)
                 {
                     PlayRandomSong();
                 }
