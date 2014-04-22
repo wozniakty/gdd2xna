@@ -23,7 +23,6 @@ namespace gdd2xna
         Input,
         SwapBack,
         CheckMatch,
-        FillBoard,
         CheckDeadlock
     }
 
@@ -86,7 +85,7 @@ namespace gdd2xna
             musicManager.Initialize();
             musicOn = true;
             soundManager.Initialize();
-            grid = new Grid(8, 8, 50, 50, this);
+            grid = new Grid(8, 8, 100, 50, this);
             step = GameStep.Input;
             prevSwap = new int[2] { 0, 0 };
             base.Initialize();
@@ -186,16 +185,12 @@ namespace gdd2xna
                             grid.EmptyTiles(match);
                         }
                         lowestEmp = grid.DropEmpties();
-                        step = GameStep.FillBoard;
+                        grid.RefillBoard(lowestEmp);
+                        if (grid.FindMatches().Count > 0)
+                            step = GameStep.CheckMatch;
+                        else
+                            step = GameStep.CheckDeadlock;
                     }
-                }
-                else if (step == GameStep.FillBoard)
-                {
-                    grid.RefillBoard(lowestEmp);
-                    if (grid.FindMatches().Count > 0)
-                        step = GameStep.CheckMatch;
-                    else
-                        step = GameStep.CheckDeadlock;
                 }
                 else if (step == GameStep.CheckDeadlock)
                 {

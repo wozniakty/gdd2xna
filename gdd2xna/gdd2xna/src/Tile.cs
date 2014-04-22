@@ -88,7 +88,7 @@ namespace gdd2xna
             animating = false;
             realPosition = new float2(x * Grid.TILE_SIZE + container.rect.Left, y * Grid.TILE_SIZE + container.rect.Top );
             targetPosition = new Point(x * Grid.TILE_SIZE + container.rect.Left, y * Grid.TILE_SIZE + container.rect.Top);
-            SPEED = new float2(2f, 2f);
+            SPEED = new float2(4f, 4f);
         }
 
         public Point Position

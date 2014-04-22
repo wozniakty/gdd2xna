@@ -427,18 +427,34 @@ namespace gdd2xna
                     top = true;
                     var cur = i;
                     var above = cur - cols;
-                    while (cur > 0)
+                    while (above > 0 - cols)
                     {
-                        if (this[cur].type != TileType.Emp)
+                        if( this[above].type != TileType.Emp )
+                        {
                             top = false;
-
-                        Swap(cur, above );
-                        cur = above;
-                        above = cur - cols;
+                            break;
+                        }
+                        else
+                        {
+                            above -= cols;
+                        }
                     }
 
-                    if (top == true && i > lowestEmp)
-                        lowestEmp = i;
+                    if (top == true)
+                    {
+                        if(i > lowestEmp)
+                            lowestEmp = i;
+                        break;
+                    }
+                    else
+                    {
+                        while(this[above].type != TileType.Emp)
+                        {
+                            Swap(cur, above);
+                            cur -= cols;
+                            above -= cols;
+                        }
+                    }                    
                 }
             }
 
