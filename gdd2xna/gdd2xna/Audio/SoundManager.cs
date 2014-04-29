@@ -21,7 +21,7 @@ namespace gdd2xna
     /// 
     /// Call soundManager.Play(yoursoundeffectname) wherever in the code you want the sound to play
     /// </summary>
-    class SoundManager
+    public class SoundManager
     {
         #region instance variables
         private List<NamedSoundEffect> soundList = new List<NamedSoundEffect>();

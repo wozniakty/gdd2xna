@@ -5,7 +5,7 @@ using System.Text;
 
 namespace gdd2xna
 {
-    enum SoundEffectName
+    public enum SoundEffectName
     {
         Match3,
         Match4

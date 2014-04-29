@@ -39,6 +39,7 @@ namespace gdd2xna
         SpriteBatch spriteBatch;
         MusicManager musicManager;
         SoundManager soundManager;
+        SpriteFont defaultFont;
         public Texture2D HamSandwich;
         public Texture2D Broccoli;
         public Texture2D Carrot;
@@ -83,6 +84,11 @@ namespace gdd2xna
             players[0].step = GameStep.Input;
         }
 
+        public Player GetPlayer(int index)
+        {
+            return players[index];
+        }
+
         /// <summary>
         /// Allows the game to perform any initialization it needs to before starting to run.
         /// This is where it can query for any required services and load any non-graphic
@@ -116,6 +122,7 @@ namespace gdd2xna
             Onion = Content.Load<Texture2D>("Art/Onion_Tile");
             Radish = Content.Load<Texture2D>("Art/Radish_Tile");
             Grid_Art = Content.Load<Texture2D>("Art/VIA_Grid_V2");
+            defaultFont = Content.Load<SpriteFont>("Spritefont1");
             Pixel = new Texture2D(GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
             Pixel.SetData(new[] { Color.White });
 
@@ -175,7 +182,7 @@ namespace gdd2xna
             // Draw each of the players
             foreach (Player next in players)
             {
-                next.Draw(gameTime, spriteBatch);
+                next.Draw(gameTime, spriteBatch, defaultFont);
             }
 
             spriteBatch.End();
