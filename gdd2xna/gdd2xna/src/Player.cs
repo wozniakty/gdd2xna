@@ -12,7 +12,7 @@ using Microsoft.Xna.Framework.Media;
 
 namespace gdd2xna
 {
-    class Player
+    public class Player
     {
         /// <summary>
         /// The locations to draw the grid at for each player.
@@ -35,7 +35,7 @@ namespace gdd2xna
         private readonly Grid grid;
 
 
-        private Dictionary<String, int> scores = new Dictionary<string,int>();
+        private Dictionary<TileType, int> scores = new Dictionary<TileType,int>();
 
         /// <summary>
         /// The sound manager instance.
@@ -77,13 +77,13 @@ namespace gdd2xna
             this.grid = new Grid(8, 8, location[0], location[1], game);
 
 
-            this.scores.Add("Red", 10);
-            this.scores.Add("Gre", 10);
-            this.scores.Add("Pur", 10);
-            this.scores.Add("Yel", 10);
-            this.scores.Add("Ora", 10);
-            this.scores.Add("Wht", 10);
-            this.scores.Add("Pnk", 10);
+            this.scores.Add(TileType.Red, 10);
+            this.scores.Add(TileType.Gre, 10);
+            this.scores.Add(TileType.Yel, 10);
+            this.scores.Add(TileType.Pur, 10);
+            this.scores.Add(TileType.Pnk, 10);
+            this.scores.Add(TileType.Wht, 10);
+            this.scores.Add(TileType.Ora, 10);
 
             step = GameStep.Waiting;
             prevSwap = new int[2] { 0, 0 };
@@ -139,10 +139,18 @@ namespace gdd2xna
                     }
                     else
                     {
+                       
                         foreach (var match in matches)
                         {
+                            foreach (var tile in match)
+                            {
+                                scores[grid[tile].type]++;
+                                game.GetPlayer(index == 0 ? 1 : 0).scores[grid[tile].type]--;
+                            }
+                                
                             grid.EmptyTiles(match);
                         }
+
                         lowestEmp = grid.DropEmpties();
                         grid.RefillBoard(lowestEmp);
                         if (grid.FindMatches().Count > 0)
@@ -180,9 +188,12 @@ namespace gdd2xna
         /// </summary>
         /// <param name="gameTime">The current game time.</param>
         /// <param name="spriteBatch">The sprite batch.</param>
-        public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
+        public void Draw(GameTime gameTime, SpriteBatch spriteBatch, SpriteFont font)
         {
             grid.Draw(spriteBatch);
+
+            spriteBatch.DrawString(font, "Green", new Vector2(10, 10), new Color(50, 50, 50));
+
         }
     }
 }
