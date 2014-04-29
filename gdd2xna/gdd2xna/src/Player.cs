@@ -35,7 +35,7 @@ namespace gdd2xna
         private readonly Grid grid;
 
 
-        private Dictionary<String, int> scores;
+        private Dictionary<String, int> scores = new Dictionary<string,int>();
 
         /// <summary>
         /// The sound manager instance.
@@ -75,6 +75,7 @@ namespace gdd2xna
             this.soundManager = soundManager;
             int[] location = GRID_LOCATIONS[index];
             this.grid = new Grid(8, 8, location[0], location[1], game);
+
 
             this.scores.Add("Red", 10);
             this.scores.Add("Gre", 10);
