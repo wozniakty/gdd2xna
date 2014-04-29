@@ -34,6 +34,9 @@ namespace gdd2xna
         /// </summary>
         private readonly Grid grid;
 
+
+        private Dictionary<String, int> scores;
+
         /// <summary>
         /// The sound manager instance.
         /// </summary>
@@ -72,6 +75,14 @@ namespace gdd2xna
             this.soundManager = soundManager;
             int[] location = GRID_LOCATIONS[index];
             this.grid = new Grid(8, 8, location[0], location[1], game);
+
+            this.scores.Add("Red", 10);
+            this.scores.Add("Gre", 10);
+            this.scores.Add("Pur", 10);
+            this.scores.Add("Yel", 10);
+            this.scores.Add("Ora", 10);
+            this.scores.Add("Wht", 10);
+            this.scores.Add("Pnk", 10);
 
             step = GameStep.Waiting;
             prevSwap = new int[2] { 0, 0 };
