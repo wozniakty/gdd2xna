@@ -150,6 +150,12 @@ namespace gdd2xna
                 this.Exit();
 
             musicManager.Update(gameTime);
+
+            if (Input.KeyPress(Keys.M))
+            {
+                musicManager.Toggle();
+            }
+
             Input.Update();
 
             // Update each of the players

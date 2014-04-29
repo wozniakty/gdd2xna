@@ -30,6 +30,12 @@ namespace gdd2xna
         /// <summary>
         /// Stops music from being played, if a song is playing, it isn't saved for when Play() is called
         /// </summary>
+        public void Toggle()
+        {
+            if (canPlay == false) Play();
+            else Stop();
+        }
+
         public void Stop()
         {
             if (currentSong != null) currentSong.Stop();
