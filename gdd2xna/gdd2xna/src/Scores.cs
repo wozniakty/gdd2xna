@@ -206,7 +206,7 @@ namespace gdd2xna
                 // If that tile is locked, grey it out
                 if (isLocked(next))
                 {
-                    spriteBatch.Draw(game.Pixel, rect, Color.Black * 0.5f);
+                    spriteBatch.Draw(game.Pixel, rect, Color.Black * 0.75f);
                 }
 
                 // Get the color of the bar

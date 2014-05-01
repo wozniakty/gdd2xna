@@ -27,7 +27,7 @@ namespace gdd2xna
         /// <summary>
         /// The points per tile.
         /// </summary>
-        private static readonly int POINTS_PER_TILE = 3; // Need a good value for this
+        private static readonly int POINTS_PER_TILE = 13; // Need a good value for this
 
         /// <summary>
         /// The game instance.
