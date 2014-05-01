@@ -73,6 +73,12 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Net" />
+    <Reference Include="TomShane.Neoforce.Controls">
+      <HintPath>..\..\..\..\Downloads\Neoforce Binary\Neoforce Binary\TomShane.Neoforce.Controls.dll</HintPath>
+    </Reference>
+    <Reference Include="TomShane.Neoforce.Importers">
+      <HintPath>..\..\..\..\Downloads\Neoforce Binary\Neoforce Binary\TomShane.Neoforce.Importers.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Audio\MusicManager.cs" />
