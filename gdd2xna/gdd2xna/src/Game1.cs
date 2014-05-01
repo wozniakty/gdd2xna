@@ -11,6 +11,9 @@ using Microsoft.Xna.Framework.Media;
 
 namespace gdd2xna
 {
+    /// <summary>
+    /// The possible game states.
+    /// </summary>
     public enum GameState
     {
         Menu,
@@ -18,6 +21,9 @@ namespace gdd2xna
         Input // Board should allow input
     }
 
+    /// <summary>
+    /// The possible game steps.
+    /// </summary>
     public enum GameStep
     {
         Input,
@@ -25,7 +31,9 @@ namespace gdd2xna
         CheckMatch,
         CheckDeadlock,
         Waiting, 
-        Complete
+        Complete,
+        Win, 
+        Lose
     }
 
 
@@ -34,6 +42,16 @@ namespace gdd2xna
     /// </summary>
     public class Game1 : Microsoft.Xna.Framework.Game
     {
+        /// <summary>
+        /// The constant for the large game size.
+        /// </summary>
+        public static readonly int SIZE_LARGE = 0;
+
+        /// <summary>
+        /// The constant for the small game size.
+        /// </summary>
+        public static readonly int SIZE_SMALL = 1;
+
         #region Fields
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
@@ -50,12 +68,19 @@ namespace gdd2xna
         public Texture2D Radish;
         public Texture2D Grid_Art;
         public Texture2D Pixel;
+        public Random random;
+
         private bool musicOn;
 
         /// <summary>
         /// The array of players.
         /// </summary>
         private readonly Player[] players;
+
+        /// <summary>
+        /// The scores instance.
+        /// </summary>
+        private readonly Scores scores;
 
         #endregion
 
@@ -65,28 +90,51 @@ namespace gdd2xna
             get { return musicOn; }
             set { musicOn = value; }
         }
+        public int SizeMode { get; set; }
         #endregion
 
-        public Game1()
+        public Game1(int sizeMode)
         {
+            random = new Random();
             graphics = new GraphicsDeviceManager(this);
             musicManager = new MusicManager(this);
             soundManager = new SoundManager(this);
-            graphics.PreferredBackBufferHeight = 900;
-            graphics.PreferredBackBufferWidth = 1600;
+            scores = new Scores(this, soundManager);
+            SizeMode = sizeMode;
+            if (sizeMode == SIZE_SMALL)
+            {
+                Grid.TILE_SIZE = 50;
+                graphics.PreferredBackBufferWidth = 1000;
+                graphics.PreferredBackBufferHeight = 480;
+            }
+            else
+            {
+                graphics.PreferredBackBufferHeight = 900;
+                graphics.PreferredBackBufferWidth = 1600;
+            }
             Content.RootDirectory = "Content";
 
             players = new Player[2];
             for (int i = 0; i < players.Length; i++)
             {
-                players[i] = new Player(this, i, soundManager);
+                players[i] = new Player(this, i, soundManager, scores);
             }
             players[0].step = GameStep.Input;
         }
 
-        public Player GetPlayer(int index)
+        /// <summary>
+        /// Set the winner of the game.
+        /// </summary>
+        /// <param name="index">The index of the winning player.</param>
+        public void SetWinner(int index)
         {
-            return players[index];
+            // Mark all other players as losers;
+            // the winner knows they won from the Scores.add() function
+            for (int i = 0; i < players.Length; i++)
+            {
+                if (i != index)
+                    players[i].step = GameStep.Lose;
+            }
         }
 
         /// <summary>
@@ -122,7 +170,7 @@ namespace gdd2xna
             Onion = Content.Load<Texture2D>("Art/Onion_Tile");
             Radish = Content.Load<Texture2D>("Art/Radish_Tile");
             Grid_Art = Content.Load<Texture2D>("Art/VIA_Grid_V2");
-            defaultFont = Content.Load<SpriteFont>("Spritefont1");
+            defaultFont = Content.Load<SpriteFont>("Fonts/Default");
             Pixel = new Texture2D(GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
             Pixel.SetData(new[] { Color.White });
 
@@ -181,7 +229,8 @@ namespace gdd2xna
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            // No more cornflower blue!
+            GraphicsDevice.Clear(Color.Black);
 
             spriteBatch.Begin();
 
@@ -190,6 +239,9 @@ namespace gdd2xna
             {
                 next.Draw(gameTime, spriteBatch, defaultFont);
             }
+
+            // Draw the scores
+            scores.Draw(gameTime, spriteBatch, defaultFont);
 
             spriteBatch.End();
             base.Draw(gameTime);
