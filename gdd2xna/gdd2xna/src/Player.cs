@@ -20,6 +20,16 @@ namespace gdd2xna
         private static readonly int[][] GRID_LOCATIONS = {new int[] {100, 100}, new int[] {800, 100}};
 
         /// <summary>
+        /// The locations to draw the grid at for each player in small window mode.
+        /// </summary>
+        private static readonly int[][] GRID_LOCATIONS_SMALL = { new int[] { 0, 0 }, new int[] { 600, 0 } };
+        
+        /// <summary>
+        /// The points per tile.
+        /// </summary>
+        private static readonly int POINTS_PER_TILE = 50; // 3
+
+        /// <summary>
         /// The game instance.
         /// </summary>
         private readonly Game1 game;
@@ -34,13 +44,20 @@ namespace gdd2xna
         /// </summary>
         private readonly Grid grid;
 
-
+        /// <summary>
+        /// The scores of the player.
+        /// </summary>
         private Dictionary<TileType, int> scores = new Dictionary<TileType,int>();
 
         /// <summary>
         /// The sound manager instance.
         /// </summary>
         private readonly SoundManager soundManager;
+
+        /// <summary>
+        /// The scores instance.
+        /// </summary>
+        private readonly Scores scoreBars;
 
         /// <summary>
         /// The current stage of the player in the game.
@@ -53,14 +70,19 @@ namespace gdd2xna
         public int Index { get { return index; } }
 
         /// <summary>
-        /// ?
+        /// The draw location of the board.
         /// </summary>
-        int[] prevSwap;
+        private int[] location;
 
         /// <summary>
         /// ?
         /// </summary>
-        int lowestEmp = 0;
+        private int[] prevSwap;
+
+        /// <summary>
+        /// ?
+        /// </summary>
+        private int lowestEmp = 0;
 
         /// <summary>
         /// Creates a new Player.
@@ -68,22 +90,33 @@ namespace gdd2xna
         /// <param name="game">The game instance.</param>
         /// <param name="index">The index of the player.</param>
         /// <param name="soundManager">The sound manager.</param>
-        public Player(Game1 game, int index, SoundManager soundManager)
+        /// <param name="scores">The scores instance.</param>
+        public Player(Game1 game, int index, SoundManager soundManager, Scores scoreBars)
         {
             this.game = game;
             this.index = index;
             this.soundManager = soundManager;
-            int[] location = GRID_LOCATIONS[index];
+            this.scoreBars = scoreBars;
+            if (game.SizeMode == Game1.SIZE_SMALL)
+            {
+                location = GRID_LOCATIONS_SMALL[index];
+            }
+            else
+            {
+                location = GRID_LOCATIONS[index];
+            }
+            
             this.grid = new Grid(8, 8, location[0], location[1], game);
 
+            // Populate the scores dictionary
+            foreach (TileType next in Enum.GetValues(typeof(TileType)))
+            {
+                // No sammiches!
+                if (next == TileType.Emp)
+                    continue;
 
-            this.scores.Add(TileType.Red, 10);
-            this.scores.Add(TileType.Gre, 10);
-            this.scores.Add(TileType.Yel, 10);
-            this.scores.Add(TileType.Pur, 10);
-            this.scores.Add(TileType.Pnk, 10);
-            this.scores.Add(TileType.Wht, 10);
-            this.scores.Add(TileType.Ora, 10);
+                this.scores.Add(next, 0);
+            }
 
             step = GameStep.Waiting;
             prevSwap = new int[2] { 0, 0 };
@@ -139,13 +172,15 @@ namespace gdd2xna
                     }
                     else
                     {
-                       
+
+                        bool win = false;
                         foreach (var match in matches)
                         {
                             foreach (var tile in match)
                             {
-                                scores[grid[tile].type]++;
-                                game.GetPlayer(index == 0 ? 1 : 0).scores[grid[tile].type]--;
+                                TileType type = grid[tile].type;
+                                scores[type] += POINTS_PER_TILE;
+                                win = win || scoreBars.add(type, index, POINTS_PER_TILE);
                             }
                                 
                             grid.EmptyTiles(match);
@@ -153,10 +188,17 @@ namespace gdd2xna
 
                         lowestEmp = grid.DropEmpties();
                         grid.RefillBoard(lowestEmp);
-                        if (grid.FindMatches().Count > 0)
-                            step = GameStep.CheckMatch;
+                        if (win)
+                        {
+                            step = GameStep.Win;
+                        }
                         else
-                            step = GameStep.CheckDeadlock;
+                        {
+                            if (grid.FindMatches().Count > 0)
+                                step = GameStep.CheckMatch;
+                            else
+                                step = GameStep.CheckDeadlock;
+                        }
                     }
                 }
                 else if (step == GameStep.CheckDeadlock)
@@ -190,10 +232,32 @@ namespace gdd2xna
         /// <param name="spriteBatch">The sprite batch.</param>
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch, SpriteFont font)
         {
-            grid.Draw(spriteBatch);
+            grid.Draw(spriteBatch, step == GameStep.Waiting);
 
-            spriteBatch.DrawString(font, "Green", new Vector2(10, 10), new Color(50, 50, 50));
+            //spriteBatch.DrawString(font, "Green", new Vector2(10, 10), new Color(50, 50, 50));
 
+            string text = null;
+            Color? color = null;
+
+            if (step == GameStep.Win)
+            {
+                text = "You win!";
+                color = Color.Green;
+            }
+            else if (step == GameStep.Lose)
+            {
+                text = "Better luck next time...";
+                color = Color.Red;
+            }
+
+            if (text != null)
+            {
+                const int BOARD_SIZE = 400;
+                int x = location[0];
+                int y = location[1] + BOARD_SIZE;
+                Vector2 size = font.MeasureString(text);
+                spriteBatch.DrawString(font, text, new Vector2(x + (BOARD_SIZE / 2) - (size.X / 2), y), color.Value);
+            }
         }
     }
 }

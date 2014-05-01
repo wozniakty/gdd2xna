@@ -33,7 +33,7 @@ namespace gdd2xna
     {
         
         private Rectangle gridRect;
-        public static readonly int TILE_SIZE = 84;
+        public static int TILE_SIZE = 84;
         private Point position;
         public int[] selection;
         public int rows, cols;
@@ -47,7 +47,7 @@ namespace gdd2xna
 #if DEBUG
             rnd = new Random(3);
 #else
-            rnd = new Random();
+            rnd = m.random;
 #endif
 
             rows = r;
@@ -569,7 +569,7 @@ namespace gdd2xna
 
         #region Draw code
 
-        public void Draw(SpriteBatch sb)
+        public void Draw(SpriteBatch sb, bool inactive)
         {
             //draw the board
             sb.Draw(main.Grid_Art, gridRect, Color.White);
@@ -595,9 +595,20 @@ namespace gdd2xna
 
                 }
             }
+
+            if (inactive)
+            {
+                sb.Draw(main.Pixel, gridRect, Color.Black * 0.5f);
+            }
+                
         }
 
         private Texture2D createTileTexture(TileType type)
+        {
+            return getTileTexture(main, type);
+        }
+
+        public static Texture2D getTileTexture(Game1 main, TileType type)
         {
             /**************************
              * set texture to an asset*
