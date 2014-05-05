@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 
+
 namespace gdd2xna
 {
     /// <summary>
@@ -68,7 +69,13 @@ namespace gdd2xna
         public Texture2D Radish;
         public Texture2D Grid_Art;
         public Texture2D Pixel;
+        public Texture2D buttonTexture;
+        public Texture2D logo;
         public Random random;
+        public Button NewGameButton;
+        public Button ShuffleP1Button;
+        public Button ShuffleP2Button;
+        
 
         private bool musicOn;
 
@@ -100,12 +107,13 @@ namespace gdd2xna
             musicManager = new MusicManager(this);
             soundManager = new SoundManager(this);
             scores = new Scores(this, soundManager);
+
             SizeMode = sizeMode;
             if (sizeMode == SIZE_SMALL)
             {
                 Grid.TILE_SIZE = 50;
                 graphics.PreferredBackBufferWidth = 1000;
-                graphics.PreferredBackBufferHeight = 480;
+                graphics.PreferredBackBufferHeight = 700;
             }
             else
             {
@@ -170,6 +178,8 @@ namespace gdd2xna
             Onion = Content.Load<Texture2D>("Art/Onion_Tile");
             Radish = Content.Load<Texture2D>("Art/Radish_Tile");
             Grid_Art = Content.Load<Texture2D>("Art/VIA_Grid_V2");
+            logo = Content.Load<Texture2D>("Art/VIA_Logo");
+            buttonTexture = Content.Load<Texture2D>("Art/button");
             defaultFont = Content.Load<SpriteFont>("Fonts/Default");
             Pixel = new Texture2D(GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
             Pixel.SetData(new[] { Color.White });
@@ -220,6 +230,23 @@ namespace gdd2xna
                 }
             }
 
+            if (defaultFont != null && buttonTexture != null)
+            {
+
+                NewGameButton = new Button(buttonTexture, defaultFont, spriteBatch);
+                NewGameButton.Location(450, 450);
+                NewGameButton.Text = "New Game";
+                ShuffleP1Button = new Button(buttonTexture, defaultFont, spriteBatch);
+                ShuffleP1Button.Location(150, 450);
+                ShuffleP1Button.Text = "Shuffle P1";
+
+                ShuffleP2Button = new Button(buttonTexture, defaultFont, spriteBatch);
+                ShuffleP2Button.Location(750, 450);
+                ShuffleP2Button.Text = "Shuffle P2";
+            }
+            
+            
+
             base.Update(gameTime);
         }
 
@@ -242,6 +269,19 @@ namespace gdd2xna
 
             // Draw the scores
             scores.Draw(gameTime, spriteBatch, defaultFont);
+
+            //Draw the buttons
+            if (defaultFont != null && buttonTexture != null)
+            {
+                NewGameButton.Draw();
+                ShuffleP1Button.Draw();
+                ShuffleP2Button.Draw();
+            }
+
+            //Trying to get the logo in there
+            Vector2 pos = new Vector2(450, 500);
+            Color c = new Color();
+            spriteBatch.Draw(logo, pos, c);
 
             spriteBatch.End();
             base.Draw(gameTime);

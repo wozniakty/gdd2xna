@@ -239,6 +239,8 @@ namespace gdd2xna
             string text = null;
             Color? color = null;
 
+
+
             if (step == GameStep.Win)
             {
                 text = "You win!";
