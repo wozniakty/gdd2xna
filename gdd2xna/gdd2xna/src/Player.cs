@@ -27,7 +27,7 @@ namespace gdd2xna
         /// <summary>
         /// The points per tile.
         /// </summary>
-        private static readonly int POINTS_PER_TILE = 50; // Need a good value for this (13)
+        private static readonly int POINTS_PER_TILE = 13; // Need a good value for this (13)
 
         /// <summary>
         /// The size of the board in pixels.
