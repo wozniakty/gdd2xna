@@ -68,7 +68,7 @@ namespace gdd2xna
                 null,
                 delegate(Button button)
                 {
-                    return game.IsGameOver();
+                    return game.IsGameOver() && game.State != GameState.NetworkPlay;
                 }
                 );
 
