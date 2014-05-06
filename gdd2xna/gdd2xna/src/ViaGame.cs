@@ -17,9 +17,8 @@ namespace gdd2xna
     /// </summary>
     public enum GameState
     {
-        Menu,
-        Animate, // Board should animate and disallow input
-        Input // Board should allow input
+        Menu, // On the main menu
+        LocalPlay
     }
 
     /// <summary>
@@ -41,7 +40,7 @@ namespace gdd2xna
     /// <summary>
     /// This is the main type for your game
     /// </summary>
-    public class Game1 : Microsoft.Xna.Framework.Game
+    public class ViaGame : Microsoft.Xna.Framework.Game
     {
         /// <summary>
         /// The constant for the large game size.
@@ -54,7 +53,7 @@ namespace gdd2xna
         public static readonly int SIZE_SMALL = 1;
 
         #region Fields
-        GraphicsDeviceManager graphics;
+        public GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         MusicManager musicManager;
         SoundManager soundManager;
@@ -72,9 +71,6 @@ namespace gdd2xna
         public Texture2D buttonTexture;
         public Texture2D logo;
         public Random random;
-        public Button NewGameButton;
-        public Button ShuffleP1Button;
-        public Button ShuffleP2Button;
         
 
         private bool musicOn;
@@ -89,6 +85,21 @@ namespace gdd2xna
         /// </summary>
         private readonly Scores scores;
 
+        /// <summary>
+        /// The main menu.
+        /// </summary>
+        private readonly MainMenu mainMenu;
+
+        /// <summary>
+        /// The in game menu.
+        /// </summary>
+        private readonly GameMenu gameMenu;
+
+        /// <summary>
+        /// The current game state.
+        /// </summary>
+        private GameState state = GameState.Menu;
+
         #endregion
 
         #region Properties
@@ -98,22 +109,46 @@ namespace gdd2xna
             set { musicOn = value; }
         }
         public int SizeMode { get; set; }
+
+        /// <summary>
+        /// The current state of the game.
+        /// </summary>
+        public GameState State
+        {
+            set
+            {
+                state = value;
+                if (state == GameState.LocalPlay)
+                {
+                    Reset();
+                }
+            }
+            get { return state; }
+
+        }
+
         #endregion
 
-        public Game1(int sizeMode)
+        /// <summary>
+        /// Creates a new ViaGame instance.
+        /// </summary>
+        /// <param name="sizeMode">The mode for the window size.</param>
+        public ViaGame(int sizeMode)
         {
             random = new Random();
             graphics = new GraphicsDeviceManager(this);
             musicManager = new MusicManager(this);
             soundManager = new SoundManager(this);
             scores = new Scores(this, soundManager);
+            mainMenu = new MainMenu(this, soundManager);
+            gameMenu = new GameMenu(this);
 
             SizeMode = sizeMode;
             if (sizeMode == SIZE_SMALL)
             {
                 Grid.TILE_SIZE = 50;
                 graphics.PreferredBackBufferWidth = 1000;
-                graphics.PreferredBackBufferHeight = 700;
+                graphics.PreferredBackBufferHeight = 550; // 480 or 700
             }
             else
             {
@@ -143,6 +178,38 @@ namespace gdd2xna
                 if (i != index)
                     players[i].step = GameStep.Lose;
             }
+        }
+
+        /// <summary>
+        /// Reset the game data.
+        /// </summary>
+        public void Reset()
+        {
+            // Reset each player.
+            foreach (Player next in players)
+            {
+                next.Reset();
+            }
+            
+            // Reset the scores.
+            scores.Reset();
+
+            // Initialize player 1
+            players[0].step = GameStep.Input;
+        }
+
+        /// <summary>
+        /// Is the current game over.
+        /// </summary>
+        /// <returns>The value.</returns>
+        public bool IsGameOver()
+        {
+            foreach (Player next in players)
+            {
+                if (next.step == GameStep.Win)
+                    return true;
+            }
+            return false;
         }
 
         /// <summary>
@@ -184,7 +251,12 @@ namespace gdd2xna
             Pixel = new Texture2D(GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
             Pixel.SetData(new[] { Color.White });
 
-            // TODO: use this.Content to load your game content here
+            foreach (Player next in players)
+            {
+                next.LoadingFinished(defaultFont);
+            }
+            mainMenu.LoadingComplete(defaultFont);
+            gameMenu.LoadingComplete(defaultFont);
         }
 
         /// <summary>
@@ -207,44 +279,45 @@ namespace gdd2xna
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
 
+            // Update the music manager
             musicManager.Update(gameTime);
 
+            // Check for the toggle music button
             if (Input.KeyPress(Keys.M))
             {
                 musicManager.Toggle();
             }
 
+            // Update input
             Input.Update();
 
-            // Update each of the players
-            foreach (Player next in players)
+            switch (state)
             {
-                next.Update(gameTime);
+                case GameState.Menu:
+                    mainMenu.Update(gameTime);
+                    break;
+                case GameState.LocalPlay:
+                    // Update each of the players
+                    foreach (Player next in players)
+                    {
+                        next.Update(gameTime);
 
-                // Check if the player has finished their turn.
-                if (next.step == GameStep.Complete)
-                {
-                    // If so, activate the next player.
-                    next.step = GameStep.Waiting;
-                    players[(next.Index + 1) % players.Length].step = GameStep.Input;
-                }
+                        // Check if the player has finished their turn.
+                        if (next.step == GameStep.Complete)
+                        {
+                            // If so, activate the next player.
+                            next.step = GameStep.Waiting;
+                            players[(next.Index + 1) % players.Length].step = GameStep.Input;
+                        }
+                    }
+
+                    // Update the scores
+                    scores.Update(gameTime);
+
+                    // Update the menu
+                    gameMenu.Update(gameTime);
+                    break;
             }
-
-            if (defaultFont != null && buttonTexture != null)
-            {
-
-                NewGameButton = new Button(buttonTexture, defaultFont, spriteBatch);
-                NewGameButton.Location(450, 450);
-                NewGameButton.Text = "New Game";
-                ShuffleP1Button = new Button(buttonTexture, defaultFont, spriteBatch);
-                ShuffleP1Button.Location(150, 450);
-                ShuffleP1Button.Text = "Shuffle P1";
-
-                ShuffleP2Button = new Button(buttonTexture, defaultFont, spriteBatch);
-                ShuffleP2Button.Location(750, 450);
-                ShuffleP2Button.Text = "Shuffle P2";
-            }
-            
             
 
             base.Update(gameTime);
@@ -259,29 +332,35 @@ namespace gdd2xna
             // No more cornflower blue!
             GraphicsDevice.Clear(Color.Black);
 
+            // Start drawing
             spriteBatch.Begin();
 
-            // Draw each of the players
-            foreach (Player next in players)
+            switch (state)
             {
-                next.Draw(gameTime, spriteBatch, defaultFont);
+                case GameState.Menu:
+                    // Draw the main menu
+                    mainMenu.Draw(gameTime, spriteBatch, defaultFont);
+                    break;
+                case GameState.LocalPlay:
+                    // Draw each of the players
+                    foreach (Player next in players)
+                    {
+                        next.Draw(gameTime, spriteBatch, defaultFont);
+                    }
+
+                    // Draw the scores
+                    scores.Draw(gameTime, spriteBatch, defaultFont);
+
+                    // Draw the menu
+                    gameMenu.Draw(gameTime, spriteBatch, defaultFont);
+                    break;
             }
+            
 
-            // Draw the scores
-            scores.Draw(gameTime, spriteBatch, defaultFont);
-
-            //Draw the buttons
-            if (defaultFont != null && buttonTexture != null)
-            {
-                NewGameButton.Draw();
-                ShuffleP1Button.Draw();
-                ShuffleP2Button.Draw();
-            }
-
-            //Trying to get the logo in there
-            Vector2 pos = new Vector2(450, 500);
+            // Trying to get the logo in there
+            /*Vector2 pos = new Vector2(450, 500);
             Color c = new Color();
-            spriteBatch.Draw(logo, pos, c);
+            spriteBatch.Draw(logo, pos, c);*/
 
             spriteBatch.End();
             base.Draw(gameTime);

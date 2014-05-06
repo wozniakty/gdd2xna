@@ -8,96 +8,189 @@ using Microsoft.Xna.Framework.Input;
 
 namespace gdd2xna
 {
-    public class Button
+    class Button
     {
-        Texture2D image;
-        SpriteFont font;
-        Rectangle location;
-        string text;
-        Vector2 textLocation;
-        public int Height;
-        public int Width;
-        SpriteBatch spriteBatch;
-        MouseState mouse;
-        MouseState oldMouse;
-        bool clicked = false;
-        string clickText = "Button was Clicked!";
+        /// <summary>
+        /// The texture of the button.
+        /// </summary>
+        private Texture2D texture;
 
-        public Button(Texture2D texture, SpriteFont font, SpriteBatch sBatch)
-        {
-            image = texture;
-            this.font = font;
-            int Height = image.Height;
-            int Width = image.Width;
-            location = new Rectangle(0, 0, Width, Height);
-            spriteBatch = sBatch;
-        }
+        /// <summary>
+        /// The bounds (x, y, width, height) of the button.
+        /// </summary>
+        private Rectangle bounds;
 
+        /// <summary>
+        /// The text of the button.
+        /// </summary>
+        private string text;
 
+        /// <summary>
+        /// The location to draw the text at.
+        /// </summary>
+        private Vector2? textLocation = null;
+
+        /// <summary>
+        /// The font that should be used to draw the button's text.
+        /// </summary>
+        private SpriteFont font;
+
+        /// <summary>
+        /// Is the button currently being hovered over.
+        /// </summary>
+        private bool hover;
+
+        /// <summary>
+        /// The callback for when the button is clicked.
+        /// </summary>
+        private ButtonClickHandler callback;
+
+        /// <summary>
+        /// The enabler for the button.
+        /// </summary>
+        private ButtonEnabler enabler;
+
+        /// <summary>
+        /// The enabler for the button's visibility.
+        /// </summary>
+        private ButtonEnabler visible;
+
+        /// <summary>
+        /// The text property.
+        /// </summary>
         public string Text
         {
-            get { return text; }
             set
             {
+                // Flag a recalculate of the location
+                textLocation = null;
                 text = value;
-                Vector2 size = font.MeasureString(text);
-                textLocation = new Vector2();
-                textLocation.Y = location.Y + ((image.Height / 2) - (size.Y / 2));
-                textLocation.X = location.X + ((image.Width / 2) - (size.X / 2));
+            }
+            get
+            {
+                return text;
             }
         }
+        
+        /// <summary>
+        /// The delegate to handle button clicks.
+        /// </summary>
+        /// <param name="button">The button that was clicked.</param>
+        public delegate void ButtonClickHandler(Button button);
 
-        public void Location(int x, int y)
+        /// <summary>
+        /// A delegate to tell when the button is enabled.
+        /// </summary>
+        /// <param name="button">The button that is being checked.</param>
+        /// <returns>If the button should be enabled.</returns>
+        public delegate bool ButtonEnabler(Button button);
+
+        public Button(
+            Texture2D texture, 
+            Vector2 location, 
+            string text, 
+            SpriteFont font,
+            ButtonClickHandler callback, 
+            ButtonEnabler enabler, 
+            ButtonEnabler visible
+            )
         {
-            location.X = x;
-            location.Y = y;
+            this.texture = texture;
+            this.bounds = new Rectangle(
+                (int)location.X, 
+                (int)location.Y, 
+                (int)(texture.Width), 
+                (int)(texture.Height)
+                );
+            this.text = text;
+            this.font = font;
+            this.callback = callback;
+            this.enabler = enabler;
+            this.visible = visible;
         }
 
-        public void Update()
+        /// <summary>
+        /// Update the button.
+        /// </summary>
+        /// <param name="gameTime">The current game time.</param>
+        public void Update(GameTime gameTime)
         {
-            mouse = Mouse.GetState();
-
-            if (mouse.LeftButton == ButtonState.Released &&
-                oldMouse.LeftButton == ButtonState.Pressed)
+            // Make sure the button is visible.
+            if (visible != null && !visible(this))
             {
-                if (location.Contains(new Point(mouse.X, mouse.Y)))
+                return;
+            }
+
+            // Check if the mouse is over the button.
+            Point position = Input.MousePos();
+            if (bounds.Contains(position))
+            {
+                hover = true;
+
+                // Check if the button is being clicked.
+                if (Input.LeftClick())
                 {
-                    clicked = true;
+                    if (enabler == null || enabler(this))
+                    {
+                        callback(this);
+                    }
                 }
             }
-
-            Text = "Click Me";
-
-            oldMouse = mouse;
+            else if (hover)
+            {
+                hover = false;
+            }
         }
 
-        public void Draw()
+        /// <summary>
+        /// Draw the button.
+        /// </summary>
+        /// <param name="gameTime">The current game time.</param>
+        /// <param name="spriteBatch">The sprite batch.</param>
+        public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-
-            if (location.Contains(new Point(mouse.X, mouse.Y)))
+            // Make sure the button is visible.
+            if (visible != null && !visible(this))
             {
-                spriteBatch.Draw(image,
-                    location,
-                    Color.Silver);
+                return;
+            }
+
+            // The text location being set to null
+            // is a flag to recalculate it.
+            if (textLocation == null)
+            {
+                Vector2 size = font.MeasureString(text);
+                float x = bounds.X + ((texture.Width / 2) - (size.X / 2));
+                float y = bounds.Y + ((texture.Height / 2) - (size.Y / 2));
+                textLocation = new Vector2(x, y);
+            }
+
+            // By default the button has no tint.
+            Color backgroundColor = Color.White;
+            Color textColor = Color.Black;
+
+            if (enabler != null && !enabler(this))
+            {
+                backgroundColor = Color.DarkGray;
             }
             else
             {
-                spriteBatch.Draw(image,
-                    location,
-                    Color.White);
+                // Tint the button when it is hovered over.
+                if (hover)
+                {
+                    backgroundColor = Color.LightGray;
+
+                    // This makes it kind of hard to read...
+                    //textColor = Color.DarkGray;
+                }
             }
+            
+            // Draw the background of the button
+            spriteBatch.Draw(texture, bounds, backgroundColor);
 
-
-            spriteBatch.DrawString(font, text, textLocation, Color.Black);
-
-            if (clicked)
-            {
-                Vector2 position = new Vector2(10, 75);
-                spriteBatch.DrawString(font, clickText, position, Color.White);
-            }
-
+            // Draw the text on the button
+            spriteBatch.DrawString(font, text, textLocation.Value, textColor);
         }
+
     }
 }
-
-
