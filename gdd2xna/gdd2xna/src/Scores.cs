@@ -87,6 +87,20 @@ namespace gdd2xna
         }
 
         /// <summary>
+        /// Get the index of the player that has locked the specified bar.
+        /// </summary>
+        /// <param name="type">The tile type of the bar.</param>
+        /// <returns>The player index, or -1 if the bar is unlocked.</returns>
+        private int getPlayerIndexForBar(TileType type)
+        {
+            if (bars[type] >= GOAL)
+                return 1;
+            else if (bars[type] <= -GOAL)
+                return 0;
+            return -1;
+        }
+
+        /// <summary>
         /// Get the color of a bar.
         /// </summary>
         /// <param name="type">The type.</param>
@@ -127,15 +141,48 @@ namespace gdd2xna
                 amount *= -1;
             }
 
+            int index = -1;
+
             // Check if the bar is already locked.
             if (isLocked(type))
             {
+                // If the opponent has that tile locked, you lose points!
+                if (getPlayerIndexForBar(type) != playerIndex)
+                    amount *= -1;
+                
+                // Affect all unlocked bars instead.
+                foreach (TileType next in Enum.GetValues(typeof(TileType)))
+                {
+                    // No sammiches!
+                    if (next == TileType.Emp)
+                        continue;
+
+                    int localIndex = incrementBar(next, amount/5);
+                    if (localIndex != -1)
+                    {
+                        index = localIndex;
+                    }
+                }
                 return false;
             }
+            else
+            {
+                index = incrementBar(type, amount);
+            }
+            
+            return index == playerIndex;
+        }
 
+        /// <summary>
+        /// Increment a bar value by the specified amount.
+        /// </summary>
+        /// <param name="type">The tile type to increment.</param>
+        /// <param name="amount">The amount to increment by.</param>
+        /// <returns></returns>
+        private int incrementBar(TileType type, int amount)
+        {
             // Increment the bar
             bars[type] += amount;
-
             int index = -1;
             // Don't go over 100 in either direction!
             if (bars[type] >= GOAL)
@@ -148,7 +195,7 @@ namespace gdd2xna
                 bars[type] = -GOAL;
                 index = checkForWin();
             }
-            return index == playerIndex;
+            return index;
         }
 
         /// <summary>

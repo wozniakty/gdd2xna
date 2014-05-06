@@ -27,7 +27,7 @@ namespace gdd2xna
         /// <summary>
         /// The points per tile.
         /// </summary>
-        private static readonly int POINTS_PER_TILE = 13; // Need a good value for this
+        private static readonly int POINTS_PER_TILE = 20; // Need a good value for this (13)
 
         /// <summary>
         /// The size of the board in pixels.
@@ -298,8 +298,8 @@ namespace gdd2xna
             }
             else
             {
-                text = "Placeholder";
-                color = Color.Blue;
+                /*text = "Placeholder";
+                color = Color.Blue;*/
             }
 
             // Draw text if needed
