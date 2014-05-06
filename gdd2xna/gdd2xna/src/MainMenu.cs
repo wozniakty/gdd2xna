@@ -108,7 +108,7 @@ namespace gdd2xna
                 defaultFont,
                 delegate(Button button)
                 {
-                    
+                    game.State = GameState.NetworkSearch;
                 },
                 null, 
                 null

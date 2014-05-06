@@ -27,7 +27,7 @@ namespace gdd2xna
         /// <summary>
         /// The points per tile.
         /// </summary>
-        private static readonly int POINTS_PER_TILE = 13; // Need a good value for this (13)
+        private static readonly int POINTS_PER_TILE = 50; // Need a good value for this (13)
 
         /// <summary>
         /// The size of the board in pixels.
@@ -116,7 +116,7 @@ namespace gdd2xna
                 location = GRID_LOCATIONS[index];
             }
 
-            this.grid = new Grid(8, 8, location[0], location[1], game);
+            this.grid = new Grid(index, 8, 8, location[0], location[1], game);
 
             Reset();
         }
@@ -156,13 +156,45 @@ namespace gdd2xna
                 defaultFont,
                 delegate(Button button)
                 {
-                    grid.ShuffleBoard();
-                    step = GameStep.Complete;
+                    if (step != GameStep.Input)
+                        return;
+
+                    HandleShuffle();
+
+                    if (game.State == GameState.NetworkPlay)
+                    {
+                        // Send the move to the server
+                        Packet p = new Packet(OutgoingPackets.SHUFFLE);
+                        game.Client.WritePacket(p);
+                    }
                 },
                 delegate(Button button) {
                     return step == GameStep.Input;
                 }, 
                 null);
+        }
+
+        /// <summary>
+        /// Handle a swap.
+        /// </summary>
+        /// <param name="first">The first grid index.</param>
+        /// <param name="second">The second grid index.</param>
+        public void HandleSwap(int first, int second)
+        {
+            grid.Swap(first, second);
+            prevSwap[0] = first;
+            prevSwap[1] = second;
+            grid.ClearSelection();
+            step = GameStep.CheckMatch;
+        }
+
+        /// <summary>
+        /// Handle a shuffle.
+        /// </summary>
+        public void HandleShuffle()
+        {
+            grid.ShuffleBoard();
+            step = GameStep.Complete;
         }
 
         /// <summary>
@@ -195,11 +227,18 @@ namespace gdd2xna
                             var swaps = grid.GetSwaps(selectNum);
                             if (swaps.Contains(gridNum))
                             {
-                                grid.Swap(selectNum, gridNum);
-                                prevSwap[0] = selectNum;
-                                prevSwap[1] = gridNum;
-                                grid.ClearSelection();
-                                step = GameStep.CheckMatch;
+                                HandleSwap(selectNum, gridNum);
+
+                                // Check if we are online
+                                if (game.State == GameState.NetworkPlay)
+                                {
+                                    // Send the move to the server
+                                    Packet p = new Packet(OutgoingPackets.SWAP_TILES);
+                                    p.writeWord(prevSwap[0]);
+                                    p.writeWord(prevSwap[1]);
+
+                                    game.Client.WritePacket(p);
+                                }
                             }
                             else
                             {
@@ -214,7 +253,22 @@ namespace gdd2xna
                     if (matches.Count == 0)
                     {
                         grid.Swap(prevSwap[0], prevSwap[1]);
-                        step = GameStep.Input;
+
+                        if (game.State == GameState.LocalPlay)
+                        {
+                            step = GameStep.Input;
+                        }
+                        else if (game.State == GameState.NetworkPlay)
+                        {
+                            if (index == 0)
+                            {
+                                step = GameStep.Input;
+                            }
+                            else
+                            {
+                                step = GameStep.NetworkInput;
+                            }
+                        }
                     }
                     else
                     {
@@ -237,6 +291,14 @@ namespace gdd2xna
                         if (win)
                         {
                             step = GameStep.Win;
+
+                            if (game.State == GameState.NetworkPlay)
+                            {
+                                // Tell the server who we think won!
+                                Packet p = new Packet(OutgoingPackets.GAME_OVER);
+                                p.writeByte(index);
+                                game.Client.WritePacket(p);
+                            }
                         }
                         else
                         {
