@@ -166,7 +166,6 @@ namespace gdd2xna
                         index = localIndex;
                     }
                 }
-                return false;
             }
             else
             {
