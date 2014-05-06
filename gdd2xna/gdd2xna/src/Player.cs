@@ -30,9 +30,14 @@ namespace gdd2xna
         private static readonly int POINTS_PER_TILE = 13; // Need a good value for this
 
         /// <summary>
+        /// The size of the board in pixels.
+        /// </summary>
+        private static readonly int BOARD_SIZE = 400;
+
+        /// <summary>
         /// The game instance.
         /// </summary>
-        private readonly Game1 game;
+        private readonly ViaGame game;
 
         /// <summary>
         /// The player index.
@@ -85,19 +90,24 @@ namespace gdd2xna
         private int lowestEmp = 0;
 
         /// <summary>
+        /// The shuffle button.
+        /// </summary>
+        private Button shuffleButton;
+
+        /// <summary>
         /// Creates a new Player.
         /// </summary>
         /// <param name="game">The game instance.</param>
         /// <param name="index">The index of the player.</param>
         /// <param name="soundManager">The sound manager.</param>
         /// <param name="scores">The scores instance.</param>
-        public Player(Game1 game, int index, SoundManager soundManager, Scores scoreBars)
+        public Player(ViaGame game, int index, SoundManager soundManager, Scores scoreBars)
         {
             this.game = game;
             this.index = index;
             this.soundManager = soundManager;
             this.scoreBars = scoreBars;
-            if (game.SizeMode == Game1.SIZE_SMALL)
+            if (game.SizeMode == ViaGame.SIZE_SMALL)
             {
                 location = GRID_LOCATIONS_SMALL[index];
             }
@@ -105,8 +115,18 @@ namespace gdd2xna
             {
                 location = GRID_LOCATIONS[index];
             }
-            
+
             this.grid = new Grid(8, 8, location[0], location[1], game);
+
+            Reset();
+        }
+
+        /// <summary>
+        /// Reset the player.
+        /// </summary>
+        public void Reset()
+        {
+            grid.Reset();
 
             // Populate the scores dictionary
             foreach (TileType next in Enum.GetValues(typeof(TileType)))
@@ -115,11 +135,34 @@ namespace gdd2xna
                 if (next == TileType.Emp)
                     continue;
 
-                this.scores.Add(next, 0);
+                scores[next] = 0;
             }
 
             step = GameStep.Waiting;
             prevSwap = new int[2] { 0, 0 };
+        }
+
+        /// <summary>
+        /// Called when asset loading is completed.
+        /// </summary>
+        /// <param name="defaultFont">The default font.</param>
+        public void LoadingFinished(SpriteFont defaultFont)
+        {
+            int offset = (BOARD_SIZE / 2) - (game.buttonTexture.Width / 2);
+            shuffleButton = new Button(
+                game.buttonTexture,
+                new Vector2(location[0] + offset, BOARD_SIZE + 25),
+                "Shuffle",
+                defaultFont,
+                delegate(Button button)
+                {
+                    grid.ShuffleBoard();
+                    step = GameStep.Complete;
+                },
+                delegate(Button button) {
+                    return step == GameStep.Input;
+                }, 
+                null);
         }
 
         /// <summary>
@@ -128,6 +171,9 @@ namespace gdd2xna
         /// <param name="gameTime">The current game time.</param>
         public void Update(GameTime gameTime)
         {
+            // Update the shuffle button
+            shuffleButton.Update(gameTime);
+
             if (!grid.Animating())
             {
                 if (step == GameStep.Input)
@@ -232,15 +278,14 @@ namespace gdd2xna
         /// <param name="spriteBatch">The sprite batch.</param>
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch, SpriteFont font)
         {
+            // Draw the grid
             grid.Draw(spriteBatch, step == GameStep.Waiting);
 
-            //spriteBatch.DrawString(font, "Green", new Vector2(10, 10), new Color(50, 50, 50));
-
+            // Check if we should draw any text.
             string text = null;
             Color? color = null;
 
-
-
+            // Check the current step of the player.
             if (step == GameStep.Win)
             {
                 text = "You win!";
@@ -251,15 +296,23 @@ namespace gdd2xna
                 text = "Better luck next time...";
                 color = Color.Red;
             }
+            else
+            {
+                text = "Placeholder";
+                color = Color.Blue;
+            }
 
+            // Draw text if needed
             if (text != null)
             {
-                const int BOARD_SIZE = 400;
                 int x = location[0];
                 int y = location[1] + BOARD_SIZE;
                 Vector2 size = font.MeasureString(text);
                 spriteBatch.DrawString(font, text, new Vector2(x + (BOARD_SIZE / 2) - (size.X / 2), y), color.Value);
             }
+
+            // Draw the shuffle button for the player
+            shuffleButton.Draw(gameTime, spriteBatch);
         }
     }
 }

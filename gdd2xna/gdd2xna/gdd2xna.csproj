@@ -79,12 +79,14 @@
     <Compile Include="Audio\SoundEffectName.cs" />
     <Compile Include="Audio\SoundManager.cs" />
     <Compile Include="src\Button.cs" />
+    <Compile Include="src\GameMenu.cs" />
     <Compile Include="src\Grid.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="src\Input.cs" />
+    <Compile Include="src\MainMenu.cs" />
     <Compile Include="src\Player.cs" />
     <Compile Include="src\Program.cs" />
-    <Compile Include="src\Game1.cs" />
+    <Compile Include="src\ViaGame.cs" />
     <Compile Include="src\Scores.cs" />
     <Compile Include="src\Tile.cs" />
   </ItemGroup>

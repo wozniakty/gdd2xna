@@ -39,9 +39,9 @@ namespace gdd2xna
         public int rows, cols;
         private Tile[,] state;
         public Random rnd;
-        private Game1 main;
+        private ViaGame main;
 
-        public Grid(int r, int c, int x, int y, Game1 m)
+        public Grid(int r, int c, int x, int y, ViaGame m)
         {
             main = m;
 #if DEBUG
@@ -59,16 +59,25 @@ namespace gdd2xna
             
 
             state = new Tile[r, c];
-            for( int i = 0; i < r; i++ )
-                for (int j = 0; j < c; ++j)
+            Reset();
+        }
+
+        /// <summary>
+        /// Reset the grid.
+        /// </summary>
+        public void Reset()
+        {
+            for (int i = 0; i < rows; i++)
+                for (int j = 0; j < cols; ++j)
                 {
                     var t = RandomTile();
-                    this[i,j] = new Tile(i,j,t, this);
+                    this[i, j] = new Tile(i, j, t, this);
                 }
             selection = new int[2] { -1, -1 };
 
             Regenerate();
         }
+
         #region accessors
         public Tile this[int r, int c]
         {
@@ -608,7 +617,7 @@ namespace gdd2xna
             return getTileTexture(main, type);
         }
 
-        public static Texture2D getTileTexture(Game1 main, TileType type)
+        public static Texture2D getTileTexture(ViaGame main, TileType type)
         {
             /**************************
              * set texture to an asset*

@@ -10,7 +10,7 @@ namespace gdd2xna
         /// </summary>
         static void Main(string[] args)
         {
-            using (Game1 game = new Game1(Game1.SIZE_SMALL))
+            using (ViaGame game = new ViaGame(ViaGame.SIZE_SMALL))
             {
                 game.Run();
             }
