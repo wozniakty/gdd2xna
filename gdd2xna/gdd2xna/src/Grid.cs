@@ -38,17 +38,18 @@ namespace gdd2xna
         public int[] selection;
         public int rows, cols;
         private Tile[,] state;
-        public Random rnd;
+        public ViaRandomWrapper rnd;
         private ViaGame main;
 
-        public Grid(int r, int c, int x, int y, ViaGame m)
+        public Grid(int playerIndex, int r, int c, int x, int y, ViaGame m)
         {
             main = m;
-#if DEBUG
+/*#if DEBUG
             rnd = new Random(3);
 #else
-            rnd = m.random;
-#endif
+            rnd = m.Random;
+#endif*/
+            rnd = new ViaRandomWrapper(playerIndex, m.Random);
 
             rows = r;
             cols = c;

@@ -18,7 +18,10 @@ namespace gdd2xna
     public enum GameState
     {
         Menu, // On the main menu
-        LocalPlay
+        NetworkSearch, // Searching for opponent online
+        LocalPlay, // Playing locally against an opponent
+        NetworkPlay, // Playing against an opponent on the network
+        Error, // An error occurred; probably with the network
     }
 
     /// <summary>
@@ -27,6 +30,7 @@ namespace gdd2xna
     public enum GameStep
     {
         Input,
+        NetworkInput, 
         SwapBack,
         CheckMatch,
         CheckDeadlock,
@@ -70,7 +74,6 @@ namespace gdd2xna
         public Texture2D Pixel;
         public Texture2D buttonTexture;
         public Texture2D logo;
-        public Random random;
         
 
         private bool musicOn;
@@ -96,6 +99,21 @@ namespace gdd2xna
         private readonly GameMenu gameMenu;
 
         /// <summary>
+        /// The network game client.
+        /// </summary>
+        private readonly GameClient gameClient;
+
+        /// <summary>
+        /// The error view.
+        /// </summary>
+        private readonly ErrorView errorView;
+
+        /// <summary>
+        /// The random generator.
+        /// </summary>
+        private readonly ViaRandom random;
+
+        /// <summary>
         /// The current game state.
         /// </summary>
         private GameState state = GameState.Menu;
@@ -117,14 +135,59 @@ namespace gdd2xna
         {
             set
             {
+                if (value == GameState.LocalPlay)
+                {
+                    Reset();
+                }
+                else if (value == GameState.NetworkSearch)
+                {
+                    gameClient.Initialize();
+                }
+                else if (value == GameState.Menu)
+                {
+                    gameClient.Shutdown(false);
+                }
                 state = value;
-                if (state == GameState.LocalPlay)
+                if (value == GameState.NetworkPlay)
                 {
                     Reset();
                 }
             }
             get { return state; }
 
+        }
+
+        /// <summary>
+        /// The game client property.
+        /// </summary>
+        public GameClient Client
+        {
+            get
+            {
+                return gameClient;
+            }
+        }
+
+        /// <summary>
+        /// The error view property.
+        /// </summary>
+        public ErrorView Error
+        {
+            get
+            {
+                return errorView;
+            }
+        }
+
+        /// <summary>
+        /// The random generator property.
+        /// </summary>
+        public ViaRandom Random
+        {
+            get
+            {
+                return random;
+            }
         }
 
         #endregion
@@ -135,13 +198,15 @@ namespace gdd2xna
         /// <param name="sizeMode">The mode for the window size.</param>
         public ViaGame(int sizeMode)
         {
-            random = new Random();
+            random = new ViaRandom(this);
             graphics = new GraphicsDeviceManager(this);
             musicManager = new MusicManager(this);
             soundManager = new SoundManager(this);
             scores = new Scores(this, soundManager);
             mainMenu = new MainMenu(this, soundManager);
             gameMenu = new GameMenu(this);
+            gameClient = new GameClient(this);
+            errorView = new ErrorView(this);
 
             SizeMode = sizeMode;
             if (sizeMode == SIZE_SMALL)
@@ -163,6 +228,16 @@ namespace gdd2xna
                 players[i] = new Player(this, i, soundManager, scores);
             }
             players[0].step = GameStep.Input;
+        }
+
+        /// <summary>
+        /// Get the player at the specified index.
+        /// </summary>
+        /// <param name="index">The index.</param>
+        /// <returns>The player.</returns>
+        public Player GetPlayer(int index)
+        {
+            return players[index];
         }
 
         /// <summary>
@@ -257,6 +332,8 @@ namespace gdd2xna
             }
             mainMenu.LoadingComplete(defaultFont);
             gameMenu.LoadingComplete(defaultFont);
+            gameClient.LoadingComplete(defaultFont);
+            errorView.LoadingComplete(defaultFont);
         }
 
         /// <summary>
@@ -296,7 +373,11 @@ namespace gdd2xna
                 case GameState.Menu:
                     mainMenu.Update(gameTime);
                     break;
+                case GameState.NetworkSearch:
+                    gameClient.Update(gameTime);
+                    break;
                 case GameState.LocalPlay:
+                case GameState.NetworkPlay:
                     // Update each of the players
                     foreach (Player next in players)
                     {
@@ -305,9 +386,23 @@ namespace gdd2xna
                         // Check if the player has finished their turn.
                         if (next.step == GameStep.Complete)
                         {
-                            // If so, activate the next player.
+                            // If so, mark them as waiting
                             next.step = GameStep.Waiting;
-                            players[(next.Index + 1) % players.Length].step = GameStep.Input;
+
+                            int index = (next.Index + 1) % players.Length;
+
+                            // And active the next player
+                            if (state == GameState.LocalPlay)
+                            {
+                                players[index].step = GameStep.Input;
+                            }
+                            else if (state == GameState.NetworkPlay)
+                            {
+                                if (index == 0)
+                                    players[index].step = GameStep.Input;
+                                else
+                                    players[index].step = GameStep.NetworkInput;
+                            }
                         }
                     }
 
@@ -316,6 +411,9 @@ namespace gdd2xna
 
                     // Update the menu
                     gameMenu.Update(gameTime);
+                    break;
+                case GameState.Error:
+                    errorView.Update(gameTime);
                     break;
             }
             
@@ -341,7 +439,11 @@ namespace gdd2xna
                     // Draw the main menu
                     mainMenu.Draw(gameTime, spriteBatch, defaultFont);
                     break;
+                case GameState.NetworkSearch:
+                    gameClient.Draw(gameTime, spriteBatch, defaultFont);
+                    break;
                 case GameState.LocalPlay:
+                case GameState.NetworkPlay:
                     // Draw each of the players
                     foreach (Player next in players)
                     {
@@ -353,6 +455,9 @@ namespace gdd2xna
 
                     // Draw the menu
                     gameMenu.Draw(gameTime, spriteBatch, defaultFont);
+                    break;
+                case GameState.Error:
+                    errorView.Draw(gameTime, spriteBatch, defaultFont);
                     break;
             }
             

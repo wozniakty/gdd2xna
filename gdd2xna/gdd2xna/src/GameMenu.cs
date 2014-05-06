@@ -56,7 +56,14 @@ namespace gdd2xna
                 defaultFont,
                 delegate(Button button)
                 {
-                    game.State = GameState.LocalPlay;
+                    if (game.State == GameState.LocalPlay)
+                    {
+                        game.State = GameState.LocalPlay;
+                    }
+                    else if (game.State == GameState.NetworkPlay)
+                    {
+                        game.State = GameState.NetworkSearch;
+                    }
                 },
                 null,
                 delegate(Button button)
