@@ -157,6 +157,9 @@ namespace gdd2xna
                     if (next == TileType.Emp)
                         continue;
 
+                    if (isLocked(next))
+                        continue;
+
                     int localIndex = incrementBar(next, amount/5);
                     if (localIndex != -1)
                     {
