@@ -133,8 +133,8 @@ namespace gdd2xna
         /// <param name="type">The tile type.</param>
         /// <param name="playerIndex">The player index.</param>
         /// <param name="amount">The amount.</param>
-        /// <returns>If the player won the match.</returns>
-        public bool add(TileType type, int playerIndex, int amount)
+        /// <returns>The index of the player that won the match, or -1.</returns>
+        public int add(TileType type, int playerIndex, int amount)
         {
             if (playerIndex == 0)
             {
@@ -148,7 +148,17 @@ namespace gdd2xna
             {
                 // If the opponent has that tile locked, you lose points!
                 if (getPlayerIndexForBar(type) != playerIndex)
+                {
                     amount *= -1;
+
+                    // When losing points, only do 1/5 the normal value.
+                    amount /= 5;
+                }
+                else
+                {
+                    // But when gaining points, do 1/2 the normal value :)
+                    amount /= 2;
+                }
                 
                 // Affect all unlocked bars instead.
                 foreach (TileType next in Enum.GetValues(typeof(TileType)))
@@ -157,10 +167,11 @@ namespace gdd2xna
                     if (next == TileType.Emp)
                         continue;
 
+                    // Don't unlock anything!
                     if (isLocked(next))
                         continue;
 
-                    int localIndex = incrementBar(next, amount/5);
+                    int localIndex = incrementBar(next, amount);
                     if (localIndex != -1)
                     {
                         index = localIndex;
@@ -172,7 +183,7 @@ namespace gdd2xna
                 index = incrementBar(type, amount);
             }
             
-            return index == playerIndex;
+            return index;
         }
 
         /// <summary>
@@ -207,8 +218,9 @@ namespace gdd2xna
         private int checkForWin()
         {
             int index = getWinningPlayer();
-            if (index != -1)
-                game.SetWinner(index);
+            // This is now handled in Player.cs
+            /*if (index != -1)
+                game.SetWinner(index);*/
             return index;
         }
 

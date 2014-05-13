@@ -33,6 +33,7 @@ namespace gdd2xna
         NetworkInput, 
         SwapBack,
         CheckMatch,
+        CheckMatchShuffle,
         CheckDeadlock,
         Waiting, 
         Complete,
@@ -46,6 +47,12 @@ namespace gdd2xna
     /// </summary>
     public class ViaGame : Microsoft.Xna.Framework.Game
     {
+
+        /// <summary>
+        /// The build number of the game.
+        /// </summary>
+        public static readonly int GAME_BUILD = 2;
+
         /// <summary>
         /// The constant for the large game size.
         /// </summary>
@@ -246,8 +253,8 @@ namespace gdd2xna
         /// <param name="index">The index of the winning player.</param>
         public void SetWinner(int index)
         {
+            players[index].step = GameStep.Win;
             // Mark all other players as losers;
-            // the winner knows they won from the Scores.add() function
             for (int i = 0; i < players.Length; i++)
             {
                 if (i != index)
@@ -334,6 +341,8 @@ namespace gdd2xna
             gameMenu.LoadingComplete(defaultFont);
             gameClient.LoadingComplete(defaultFont);
             errorView.LoadingComplete(defaultFont);
+
+            Console.WriteLine("Starting Via client build " + GAME_BUILD + ".");
         }
 
         /// <summary>
