@@ -30,6 +30,11 @@ namespace gdd2xna
         private static readonly int POINTS_PER_TILE = 13; // Need a good value for this (13) (32 for testing)
 
         /// <summary>
+        /// The amount of shuffles per game.
+        /// </summary>
+        private static readonly int SHUFFLES_PER_GAME = 3;
+
+        /// <summary>
         /// The size of the board in pixels.
         /// </summary>
         private static readonly int BOARD_SIZE = 400;
@@ -95,6 +100,11 @@ namespace gdd2xna
         private Button shuffleButton;
 
         /// <summary>
+        /// The amount of shuffles that the player has left.
+        /// </summary>
+        private int shufflesRemaining = SHUFFLES_PER_GAME;
+
+        /// <summary>
         /// Creates a new Player.
         /// </summary>
         /// <param name="game">The game instance.</param>
@@ -140,6 +150,8 @@ namespace gdd2xna
 
             step = GameStep.Waiting;
             prevSwap = new int[2] { 0, 0 };
+            shufflesRemaining = SHUFFLES_PER_GAME;
+            updateShuffleText();
         }
 
         /// <summary>
@@ -170,7 +182,7 @@ namespace gdd2xna
                 },
                 delegate(Button button)
                 {
-                    return step == GameStep.Input;
+                    return step == GameStep.Input && shufflesRemaining > 0;
                 },
                 delegate(Button button)
                 {
@@ -180,6 +192,8 @@ namespace gdd2xna
                     }
                     return true;
                 });
+
+            updateShuffleText();
         }
 
         /// <summary>
@@ -197,10 +211,29 @@ namespace gdd2xna
         }
 
         /// <summary>
+        /// Update the text of the shuffle button.
+        /// </summary>
+        private void updateShuffleText()
+        {
+            if (shuffleButton != null)
+            {
+                shuffleButton.Text = "Shuffle (" + shufflesRemaining + ")";
+            }
+        }
+
+        /// <summary>
         /// Handle a shuffle.
         /// </summary>
         public void HandleShuffle()
         {
+            if (shufflesRemaining <= 0)
+            {
+                // Someone is probably trying to cheat.
+                return;
+            }
+
+            shufflesRemaining--;
+            updateShuffleText();
             grid.ShuffleBoard();
             step = GameStep.CheckMatchShuffle;
         }
@@ -259,7 +292,7 @@ namespace gdd2xna
                 {
                     var matches = grid.FindMatches();
                     GameStep noMatchStep = GameStep.Input;
-                    GameStep noMatchNetworkStep = GameStep.Input;
+                    GameStep noMatchNetworkStep = GameStep.NetworkInput;
                     if (step == GameStep.CheckMatchShuffle)
                     {
                         noMatchStep = GameStep.CheckDeadlock;
@@ -267,7 +300,11 @@ namespace gdd2xna
                     }
                     if (matches.Count == 0)
                     {
-                        grid.Swap(prevSwap[0], prevSwap[1]);
+                        // Don't unswap tiles on a shuffle.
+                        if (step != GameStep.CheckMatchShuffle)
+                        {
+                            grid.Swap(prevSwap[0], prevSwap[1]);
+                        }
 
                         if (game.State == GameState.LocalPlay)
                         {
