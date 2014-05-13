@@ -171,19 +171,15 @@ namespace gdd2xna
                     if (isLocked(next))
                         continue;
 
-                    int localIndex = incrementBar(next, amount);
-                    if (localIndex != -1)
-                    {
-                        index = localIndex;
-                    }
+                    incrementBar(next, amount);
                 }
             }
             else
             {
-                index = incrementBar(type, amount);
+                incrementBar(type, amount);
             }
             
-            return index;
+            return getWinningPlayer();
         }
 
         /// <summary>
@@ -191,37 +187,19 @@ namespace gdd2xna
         /// </summary>
         /// <param name="type">The tile type to increment.</param>
         /// <param name="amount">The amount to increment by.</param>
-        /// <returns></returns>
-        private int incrementBar(TileType type, int amount)
+        private void incrementBar(TileType type, int amount)
         {
             // Increment the bar
             bars[type] += amount;
-            int index = -1;
             // Don't go over 100 in either direction!
             if (bars[type] >= GOAL)
             {
                 bars[type] = GOAL;
-                index = checkForWin();
             }
             else if (bars[type] <= -GOAL)
             {
                 bars[type] = -GOAL;
-                index = checkForWin();
             }
-            return index;
-        }
-
-        /// <summary>
-        /// Check for a win.
-        /// </summary>
-        /// <returns>The index of the winning player, or -1.</returns>
-        private int checkForWin()
-        {
-            int index = getWinningPlayer();
-            // This is now handled in Player.cs
-            /*if (index != -1)
-                game.SetWinner(index);*/
-            return index;
         }
 
         /// <summary>

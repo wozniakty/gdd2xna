@@ -51,7 +51,7 @@ namespace gdd2xna
         /// <summary>
         /// The build number of the game.
         /// </summary>
-        public static readonly int GAME_BUILD = 2;
+        public static readonly int GAME_BUILD = 3;
 
         /// <summary>
         /// The constant for the large game size.

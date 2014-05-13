@@ -32,6 +32,11 @@ namespace gdd2xna
         public static readonly bool DEBUG = false;
 
         /// <summary>
+        /// The network protocol version of the client.
+        /// </summary>
+        public static readonly int NETWORK_PROTOCOL_VERSION = 2;
+
+        /// <summary>
         /// The network error message.
         /// </summary>
         private static readonly string ERROR_MESSAGE = "Sorry, a network error occurred.";
@@ -72,9 +77,19 @@ namespace gdd2xna
         private Thread reader = null;
 
         /// <summary>
+        /// Is the reader thread running.
+        /// </summary>
+        private bool readerRunning = false;
+
+        /// <summary>
         /// The packet writing thread.
         /// </summary>
         private Thread writer = null;
+
+        /// <summary>
+        /// Is the write thread running.
+        /// </summary>
+        private bool writerRunning = false;
 
         /// <summary>
         /// Is the client shutting down.
@@ -129,6 +144,7 @@ namespace gdd2xna
         /// </summary>
         private void WriteLoop()
         {
+            writerRunning = true;
             try
             {
                 Packet next;
@@ -156,6 +172,7 @@ namespace gdd2xna
                 if (!shuttingDown)
                     Shutdown(true);
             }
+            writerRunning = false;
         }
 
         /// <summary>
@@ -163,6 +180,7 @@ namespace gdd2xna
         /// </summary>
         private void Connect()
         {
+            readerRunning = true;
             try
             {
                 socket = new TcpClient();
@@ -170,6 +188,8 @@ namespace gdd2xna
 
                 // Write the login packet
                 Packet handshake = new Packet(13); // 13 is lucky right? ;)
+                handshake.writeDWord(ViaGame.GAME_BUILD);
+                handshake.writeDWord(NETWORK_PROTOCOL_VERSION);
                 handshake.writeString("test");
                 handshake.WriteTo(socket);
 
@@ -232,6 +252,7 @@ namespace gdd2xna
                 if (!shuttingDown)
                     Shutdown(true);
             }
+            readerRunning = false;
         }
 
         /// <summary>
@@ -308,6 +329,13 @@ namespace gdd2xna
         {
             status = "Connecting to server...";
             Shutdown(false);
+
+            // Wait for the threads to close down
+            while (readerRunning || writerRunning)
+            {
+                Thread.Sleep(500);
+            }
+
             shuttingDown = false;
             reader = new Thread(new ThreadStart(Connect));
             reader.Start();
