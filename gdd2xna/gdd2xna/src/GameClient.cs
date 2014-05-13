@@ -34,7 +34,7 @@ namespace gdd2xna
         /// <summary>
         /// The network protocol version of the client.
         /// </summary>
-        public static readonly int NETWORK_PROTOCOL_VERSION = 5;
+        public static readonly int NETWORK_PROTOCOL_VERSION = 6;
 
         /// <summary>
         /// The network error message.
@@ -253,6 +253,7 @@ namespace gdd2xna
                 // Request a game
                 Packet gameRequest = new Packet(OutgoingPackets.REQUEST_GAME);
                 gameRequest.writeByte((int)game.Mode);
+                gameRequest.writeBoolean(game.RottenMode);
                 gameRequest.WriteTo(socket);
 
                 // Update the status

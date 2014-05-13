@@ -30,6 +30,11 @@ namespace gdd2xna
         public static readonly string OPPONENT_LOCATION_TEXT = "Opponent Location";
 
         /// <summary>
+        /// The rotten mode text.
+        /// </summary>
+        public static readonly string ROTTON_TEXT = "Rotten Mode";
+
+        /// <summary>
         /// The names of the game modes.
         /// </summary>
         public static readonly string[] GAME_MODE_NAMES = { "Turns", "Realtime" };
@@ -75,6 +80,11 @@ namespace gdd2xna
         private Vector2 opponontLocationTextLocation;
 
         /// <summary>
+        /// The rotten mode text location.
+        /// </summary>
+        private Vector2 rottenModeTextLocation;
+
+        /// <summary>
         /// The error text location
         /// </summary>
         private Vector2? errorTextLocation = null;
@@ -108,6 +118,11 @@ namespace gdd2xna
         /// The opponent location button.
         /// </summary>
         private Button opponentLocationButton;
+
+        /// <summary>
+        /// The rotton button.
+        /// </summary>
+        private Button rottenModeButton;
 
         /// <summary>
         /// Creates a new Options.
@@ -171,7 +186,8 @@ namespace gdd2xna
             titleTextLocation = new Vector2(halfWidth - (size.X / 2), currentY);
 
             size = defaultFont.MeasureString(GAME_MODE_TEXT);
-            currentY = (game.graphics.PreferredBackBufferHeight / 2) - ((int)((size.Y * 2) + game.buttonTexture.Height*2)/2);
+            const int optionCount = 3;
+            currentY = (game.graphics.PreferredBackBufferHeight / 2) - ((int)((size.Y * optionCount) + game.buttonTexture.Height * optionCount) / 2);
             gameModeTextLocation = new Vector2(halfWidth - (size.X / 2), currentY);
 
             currentY += (int)size.Y + 5;
@@ -216,6 +232,34 @@ namespace gdd2xna
                     {
                         NextState = GameState.LocalPlay;
                         button.Text = "Local";
+                    }
+                },
+                null,
+                null
+                );
+
+            currentY += game.buttonTexture.Height + 5;
+
+            size = defaultFont.MeasureString(ROTTON_TEXT);
+            rottenModeTextLocation = new Vector2(halfWidth - (size.X / 2), currentY);
+
+            currentY += (int)size.Y + 5;
+
+            rottenModeButton = new Button(
+                game.buttonTexture,
+                new Vector2(buttonX, currentY),
+                "Off",
+                defaultFont,
+                delegate(Button button)
+                {
+                    game.RottenMode = !game.RottenMode;
+                    if (game.RottenMode)
+                    {
+                        button.Text = "On";
+                    }
+                    else
+                    {
+                        button.Text = "Off";
                     }
                 },
                 null,
@@ -267,6 +311,7 @@ namespace gdd2xna
             startButton.Update(gameTime);
             gameModeButton.Update(gameTime);
             opponentLocationButton.Update(gameTime);
+            rottenModeButton.Update(gameTime);
         }
 
         /// <summary>
@@ -287,6 +332,10 @@ namespace gdd2xna
             // Draw the opponent location text & button
             spriteBatch.DrawString(defaultFont, OPPONENT_LOCATION_TEXT, opponontLocationTextLocation, Color.DarkGreen);
             opponentLocationButton.Draw(gameTime, spriteBatch);
+
+            // Draw the rotten option text & button
+            spriteBatch.DrawString(defaultFont, ROTTON_TEXT, rottenModeTextLocation, Color.DarkGreen);
+            rottenModeButton.Draw(gameTime, spriteBatch);
 
             // Draw error text, if applicable
             if (errorTextLocation != null)

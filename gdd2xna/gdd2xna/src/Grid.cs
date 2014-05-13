@@ -31,35 +31,60 @@ namespace gdd2xna
 
     public class Grid
     {
+        /// <summary>
+        /// The index of the player the grid belongs too.
+        /// </summary>
+        private readonly int playerIndex;
         
+        /// <summary>
+        /// The rectangular bounds of the Grid.
+        /// </summary>
         private Rectangle gridRect;
+
+        /// <summary>
+        /// The size of a tile in pixels.
+        /// </summary>
         public static int TILE_SIZE = 84;
+
+        /// <summary>
+        /// The position of the grid on the screen.
+        /// </summary>
         private Point position;
+
         public int[] selection;
         public int rows, cols;
         private Tile[,] state;
+
+        /// <summary>
+        /// The random wrapper.
+        /// </summary>
         public ViaRandomWrapper rnd;
+
+        /// <summary>
+        /// The game instance.
+        /// </summary>
         private ViaGame main;
 
-        public Grid(int playerIndex, int r, int c, int x, int y, ViaGame m)
+        public Grid(int playerIndex, int rows, int cols, int x, int y, ViaGame game)
         {
-            main = m;
+            main = game;
 /*#if DEBUG
             rnd = new Random(3);
 #else
             rnd = m.Random;
 #endif*/
-            rnd = new ViaRandomWrapper(playerIndex, m.Random);
+            rnd = new ViaRandomWrapper(playerIndex, main.Random);
 
-            rows = r;
-            cols = c;
-            gridRect.Width = c * (TILE_SIZE);
-            gridRect.Height = r * (TILE_SIZE);
+            this.rows = rows;
+            this.cols = cols;
+            this.playerIndex = playerIndex;
+            gridRect.Width = cols * (TILE_SIZE);
+            gridRect.Height = rows * (TILE_SIZE);
             gridRect.X = x;
             gridRect.Y = y;
             
 
-            state = new Tile[r, c];
+            state = new Tile[rows, cols];
             Reset();
         }
 
@@ -591,7 +616,7 @@ namespace gdd2xna
             {
                 for (int j = 0; j < cols; ++j)
                 {
-                    var tileTexture = createTileTexture(this[i, j].type);
+                    var tileTexture = getTileTexture(this[i, j].type);
                     var tileRect = new Rectangle((int)this[i,j].ScreenPosition.x,(int)this[i,j].ScreenPosition.y - Grid.TILE_SIZE, Grid.TILE_SIZE, Grid.TILE_SIZE); 
                     if (this[i, j].type != TileType.Emp)
                         sb.Draw(tileTexture, tileRect, tileColor);
@@ -613,17 +638,38 @@ namespace gdd2xna
                 
         }
 
-        private Texture2D createTileTexture(TileType type)
+        /// <summary>
+        /// Get the texture for the specified tile.
+        /// </summary>
+        /// <param name="type">The tile type.</param>
+        /// <returns>The tile texture.</returns>
+        private Texture2D getTileTexture(TileType type)
         {
-            return getTileTexture(main, type);
+            return getTileTexture(main, playerIndex, type);
         }
 
-        public static Texture2D getTileTexture(ViaGame main, TileType type)
+        /// <summary>
+        /// Get the texture for the specified tile.
+        /// </summary>
+        /// <param name="main">The game instance.</param>
+        /// <param name="playerIndex">The player index.</param>
+        /// <param name="type">The tile type.</param>
+        /// <returns></returns>
+        public static Texture2D getTileTexture(ViaGame main, int playerIndex, TileType type)
         {
             /**************************
              * set texture to an asset*
              * in switch statement    *
              * ************************/
+
+            if (main.RottenMode)
+            {
+                int lockedIndex = main.Scores.getPlayerIndexForBar(type);
+                if (playerIndex != -1 && lockedIndex != -1 && lockedIndex != playerIndex)
+                {
+                    return main.rotten;
+                }
+            }
 
             switch (type)
             {

@@ -91,7 +91,7 @@ namespace gdd2xna
         /// </summary>
         /// <param name="type">The tile type of the bar.</param>
         /// <returns>The player index, or -1 if the bar is unlocked.</returns>
-        private int getPlayerIndexForBar(TileType type)
+        public int getPlayerIndexForBar(TileType type)
         {
             if (bars[type] >= GOAL)
                 return 1;
@@ -306,7 +306,7 @@ namespace gdd2xna
                     else if (score > 1)
                         tileXOffset = barWidth;
                 }
-                Texture2D texture = Grid.getTileTexture(game, next);
+                Texture2D texture = Grid.getTileTexture(game, -1, next);
 
                 // Calculate the goal tile X
                 int goalTileX = (x + tileXOffset);
