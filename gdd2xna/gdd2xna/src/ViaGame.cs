@@ -62,7 +62,7 @@ namespace gdd2xna
         /// <summary>
         /// The build number of the game.
         /// </summary>
-        public static readonly int GAME_BUILD = 4;
+        public static readonly int GAME_BUILD = 5;
 
         /// <summary>
         /// The constant for the large game size.
@@ -92,6 +92,7 @@ namespace gdd2xna
         public Texture2D Pixel;
         public Texture2D buttonTexture;
         public Texture2D logo;
+        public Texture2D rotten;
         
 
         private bool musicOn;
@@ -178,7 +179,7 @@ namespace gdd2xna
                 }
                 else if (value == GameState.Menu)
                 {
-                    gameClient.Shutdown(false);
+                    gameClient.Shutdown(false, null);
                 }
                 else if (value == GameState.Options)
                 {
@@ -387,6 +388,7 @@ namespace gdd2xna
             Radish = Content.Load<Texture2D>("Art/V2/Radish_Tile");
             Grid_Art = Content.Load<Texture2D>("Art/VIA_Grid_V2");
             logo = Content.Load<Texture2D>("Art/V2/VIA_Logo");
+            rotten = Content.Load<Texture2D>("Art/V2/Rotten_Tile");
             buttonTexture = Content.Load<Texture2D>("Art/button");
             defaultFont = Content.Load<SpriteFont>("Fonts/Default");
             Pixel = new Texture2D(GraphicsDevice, 1, 1, false, SurfaceFormat.Color);

@@ -34,7 +34,7 @@ namespace gdd2xna
         /// <summary>
         /// The network protocol version of the client.
         /// </summary>
-        public static readonly int NETWORK_PROTOCOL_VERSION = 3;
+        public static readonly int NETWORK_PROTOCOL_VERSION = 5;
 
         /// <summary>
         /// The network error message.
@@ -170,9 +170,48 @@ namespace gdd2xna
                     Console.WriteLine(ex);
                 }
                 if (!shuttingDown)
-                    Shutdown(true);
+                    Shutdown(true, null);
             }
             writerRunning = false;
+        }
+
+        /// <summary>
+        /// Get the next packet from the stream.
+        /// </summary>
+        /// <param name="stream">The stream.</param>
+        /// <returns>The next packet.</returns>
+        private Packet GetNextPacket(NetworkStream stream)
+        {
+            // Read the next packet ID
+            int id = stream.ReadByte();
+
+            if (id == -1)
+            {
+                return null;
+            }
+            // Read the length of the packet
+            byte[] sizePayload = new byte[2];
+            stream.Read(sizePayload, 0, sizePayload.Length);
+
+            // Parse the length
+            Packet sizePacket = new Packet(-1, sizePayload);
+            int size = sizePacket.readUnsignedWord();
+
+            // Read the payload
+            byte[] payload = new byte[size];
+            if (size != 0)
+            {
+                int read = 0;
+                while (read < payload.Length)
+                {
+                    int n = stream.Read(payload, read, payload.Length - read);
+                    read += n;
+                }
+            }
+
+            // Create the packet object
+            Packet packet = new Packet(id, payload);
+            return packet;
         }
 
         /// <summary>
@@ -181,6 +220,7 @@ namespace gdd2xna
         private void Connect()
         {
             readerRunning = true;
+            string message = null;
             try
             {
                 socket = new TcpClient();
@@ -193,6 +233,23 @@ namespace gdd2xna
                 handshake.writeString("Via-" + UnixTimeNow());
                 handshake.WriteTo(socket);
 
+                // Get the stream
+                NetworkStream stream = socket.GetStream();
+
+                // Wait for a response from the server
+                Packet response = GetNextPacket(stream);
+                if (response == null || response.getId() != 13)
+                {
+                    // Uhh, panic?
+                    throw new Exception("");
+                }
+                int code = response.readUnsignedWord();
+                message = response.readString();
+                if (code != 0)
+                {
+                    throw new Exception(message);
+                }
+
                 // Request a game
                 Packet gameRequest = new Packet(OutgoingPackets.REQUEST_GAME);
                 gameRequest.writeByte((int)game.Mode);
@@ -201,9 +258,6 @@ namespace gdd2xna
                 // Update the status
                 status = "Searching for an opponent...";
 
-                // Get the stream
-                NetworkStream stream = socket.GetStream();
-
                 // Start the thread that writes packets
                 writer = new Thread(new ThreadStart(WriteLoop));
                 writer.Start();
@@ -211,36 +265,14 @@ namespace gdd2xna
                 // Start reading packets
                 while (socket != null && socket.Connected)
                 {
-                    // Read the next packet ID
-                    int id = stream.ReadByte();
+                    
 
-                    if (id == -1)
+                    Packet packet = GetNextPacket(stream);
+                    if (packet == null)
                     {
-                        return;
+                        break;
                     }
-
-                    // Read the length of the packet
-                    byte[] sizePayload = new byte[2];
-                    stream.Read(sizePayload, 0, sizePayload.Length);
-
-                    // Parse the length
-                    Packet sizePacket = new Packet(-1, sizePayload);
-                    int size = sizePacket.readUnsignedWord();
-
-                    // Read the payload
-                    byte[] payload = new byte[size];
-                    if (size != 0)
-                    {
-                        int read = 0;
-                        while (read < payload.Length)
-                        {
-                            int n = stream.Read(payload, read, payload.Length - read);
-                            read += n;
-                        }
-                    }
-
-                    // Create the packet object
-                    Packet packet = new Packet(id, payload);
+                    
                     ReadPacket(packet);
                 }
             }
@@ -251,7 +283,7 @@ namespace gdd2xna
                     Console.WriteLine(ex);
                 }
                 if (!shuttingDown)
-                    Shutdown(true);
+                    Shutdown(true, message);
             }
             readerRunning = false;
         }
@@ -340,7 +372,7 @@ namespace gdd2xna
         public void Initialize()
         {
             status = "Connecting to server...";
-            Shutdown(false);
+            Shutdown(false, null);
 
             // Wait for the threads to close down
             long startTime = UnixTimeNow();
@@ -358,11 +390,19 @@ namespace gdd2xna
         /// Shutdown the client.
         /// </summary>
         /// <param name="error">Was the shutdown due to an error.</param>
-        public void Shutdown(bool error)
+        /// <param name="message">The custom error messag.e</param>
+        public void Shutdown(bool error, string message)
         {
             if (error)
             {
-                game.Error.Message = ERROR_MESSAGE;
+                if (message == null)
+                {
+                    game.Error.Message = ERROR_MESSAGE;
+                }
+                else
+                {
+                    game.Error.Message = message;
+                }
                 game.State = GameState.Error;
             }
             else
