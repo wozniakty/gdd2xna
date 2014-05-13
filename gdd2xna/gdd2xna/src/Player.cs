@@ -194,7 +194,7 @@ namespace gdd2xna
         public void HandleShuffle()
         {
             grid.ShuffleBoard();
-            step = GameStep.Complete;
+            step = GameStep.CheckMatchShuffle;
         }
 
         /// <summary>
@@ -247,22 +247,27 @@ namespace gdd2xna
                         }
                     }
                 }
-                else if (step == GameStep.CheckMatch)
+                else if (step == GameStep.CheckMatch || step == GameStep.CheckMatchShuffle)
                 {
                     var matches = grid.FindMatches();
+                    GameStep nextStep = GameStep.Input;
+                    if (step == GameStep.CheckMatchShuffle)
+                    {
+                        nextStep = GameStep.CheckDeadlock;
+                    }
                     if (matches.Count == 0)
                     {
                         grid.Swap(prevSwap[0], prevSwap[1]);
 
                         if (game.State == GameState.LocalPlay)
                         {
-                            step = GameStep.Input;
+                            step = nextStep;
                         }
                         else if (game.State == GameState.NetworkPlay)
                         {
                             if (index == 0)
                             {
-                                step = GameStep.Input;
+                                step = nextStep;
                             }
                             else
                             {
@@ -273,14 +278,18 @@ namespace gdd2xna
                     else
                     {
 
-                        bool win = false;
+                        int winIndex = -1;
                         foreach (var match in matches)
                         {
+                            int points = POINTS_PER_TILE;
+                            int count = match.Count();
+                            // For each amount over 3 times, give 2 extra points per tile.
+                            points += 2 * (count - 3);
                             foreach (var tile in match)
                             {
                                 TileType type = grid[tile].type;
-                                scores[type] += POINTS_PER_TILE;
-                                win = win || scoreBars.add(type, index, POINTS_PER_TILE);
+                                scores[type] += points;
+                                winIndex = scoreBars.add(type, index, points);
                             }
                                 
                             grid.EmptyTiles(match);
@@ -288,15 +297,15 @@ namespace gdd2xna
 
                         lowestEmp = grid.DropEmpties();
                         grid.RefillBoard(lowestEmp);
-                        if (win)
+                        if (winIndex != -1)
                         {
-                            step = GameStep.Win;
+                            game.SetWinner(winIndex);
 
                             if (game.State == GameState.NetworkPlay)
                             {
                                 // Tell the server who we think won!
                                 Packet p = new Packet(OutgoingPackets.GAME_OVER);
-                                p.writeByte(index);
+                                p.writeByte(winIndex);
                                 game.Client.WritePacket(p);
                             }
                         }
