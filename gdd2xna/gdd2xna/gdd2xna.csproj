@@ -85,7 +85,9 @@
     <Compile Include="src\Grid.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="src\Input.cs" />
+    <Compile Include="src\Instructions.cs" />
     <Compile Include="src\MainMenu.cs" />
+    <Compile Include="src\Options.cs" />
     <Compile Include="src\OutgoingPackets.cs" />
     <Compile Include="src\Packet.cs" />
     <Compile Include="src\Player.cs" />

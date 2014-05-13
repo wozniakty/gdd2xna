@@ -54,10 +54,15 @@ namespace gdd2xna
         private Button quitButton;
 
         /// <summary>
-        /// 
+        /// The instructions button.
         /// </summary>
-        /// <param name="game"></param>
-        /// <param name="soundManager"></param>
+        private Button instructionsButton;
+
+        /// <summary>
+        /// Creates a new MainMenu.
+        /// </summary>
+        /// <param name="game">The game instance.</param>
+        /// <param name="soundManager">The sound manager.</param>
         public MainMenu(ViaGame game, SoundManager soundManager)
         {
             this.game = game;
@@ -89,17 +94,19 @@ namespace gdd2xna
             newLocalGameButton = new Button(
                 game.buttonTexture,
                 new Vector2(buttonX, currentY),
-                "Local Game",
+                //"Local Game",
+                "New Game", 
                 defaultFont,
                 delegate(Button button)
                 {
-                    game.State = GameState.LocalPlay;
+                    //game.Options.NextState = GameState.LocalPlay;
+                    game.State = GameState.Options;
                 },
                 null, 
                 null
                 );
 
-            currentY += game.buttonTexture.Height;
+            /*currentY += game.buttonTexture.Height;*/
 
             newNetworkGameButton = new Button(
                 game.buttonTexture, 
@@ -108,13 +115,29 @@ namespace gdd2xna
                 defaultFont,
                 delegate(Button button)
                 {
-                    game.State = GameState.NetworkSearch;
+                    game.Options.NextState = GameState.NetworkSearch;
+                    game.State = GameState.Options;
                 },
                 null, 
                 null
                 );
 
-            currentY += game.buttonTexture.Height;
+            currentY += game.buttonTexture.Height + 3;
+
+            instructionsButton = new Button(
+                game.buttonTexture,
+                new Vector2(buttonX, currentY),
+                "Help",
+                defaultFont,
+                delegate(Button button)
+                {
+                    game.State = GameState.Instructions;
+                },
+                null,
+                null
+                );
+
+            currentY += game.buttonTexture.Height + 3;
 
             quitButton = new Button(
                 game.buttonTexture,
@@ -137,8 +160,9 @@ namespace gdd2xna
         public void Update(GameTime gameTime)
         {
             newLocalGameButton.Update(gameTime);
-            newNetworkGameButton.Update(gameTime);
+            //newNetworkGameButton.Update(gameTime);
             quitButton.Update(gameTime);
+            instructionsButton.Update(gameTime);
         }
 
         /// <summary>
@@ -157,8 +181,9 @@ namespace gdd2xna
 
             // Draw the buttons
             newLocalGameButton.Draw(gameTime, spriteBatch);
-            newNetworkGameButton.Draw(gameTime, spriteBatch);
+            //newNetworkGameButton.Draw(gameTime, spriteBatch);
             quitButton.Draw(gameTime, spriteBatch);
+            instructionsButton.Draw(gameTime, spriteBatch);
         }
     }
 }

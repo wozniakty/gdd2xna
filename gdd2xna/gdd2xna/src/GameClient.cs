@@ -34,7 +34,7 @@ namespace gdd2xna
         /// <summary>
         /// The network protocol version of the client.
         /// </summary>
-        public static readonly int NETWORK_PROTOCOL_VERSION = 2;
+        public static readonly int NETWORK_PROTOCOL_VERSION = 3;
 
         /// <summary>
         /// The network error message.
@@ -190,11 +190,12 @@ namespace gdd2xna
                 Packet handshake = new Packet(13); // 13 is lucky right? ;)
                 handshake.writeDWord(ViaGame.GAME_BUILD);
                 handshake.writeDWord(NETWORK_PROTOCOL_VERSION);
-                handshake.writeString("test");
+                handshake.writeString("Via-" + UnixTimeNow());
                 handshake.WriteTo(socket);
 
                 // Request a game
                 Packet gameRequest = new Packet(OutgoingPackets.REQUEST_GAME);
+                gameRequest.writeByte((int)game.Mode);
                 gameRequest.WriteTo(socket);
 
                 // Update the status
@@ -323,6 +324,17 @@ namespace gdd2xna
         }
 
         /// <summary>
+        /// Get the current UNIX timestamp. 
+        /// (http://stackoverflow.com/questions/17632584/how-to-get-the-unix-timestamp-in-c-sharp)
+        /// </summary>
+        /// <returns>The current UNIX timestamp.</returns>
+        public long UnixTimeNow()
+        {
+            var timeSpan = (DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0));
+            return (long)timeSpan.TotalSeconds;
+        }
+
+        /// <summary>
         /// Initialize the client.
         /// </summary>
         public void Initialize()
@@ -331,7 +343,8 @@ namespace gdd2xna
             Shutdown(false);
 
             // Wait for the threads to close down
-            while (readerRunning || writerRunning)
+            long startTime = UnixTimeNow();
+            while ((readerRunning || writerRunning) && UnixTimeNow() < startTime + 3)
             {
                 Thread.Sleep(500);
             }

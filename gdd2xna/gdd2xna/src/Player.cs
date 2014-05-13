@@ -168,10 +168,18 @@ namespace gdd2xna
                         game.Client.WritePacket(p);
                     }
                 },
-                delegate(Button button) {
+                delegate(Button button)
+                {
                     return step == GameStep.Input;
-                }, 
-                null);
+                },
+                delegate(Button button)
+                {
+                    if (game.State == GameState.NetworkPlay)
+                    {
+                        return index == 0;
+                    }
+                    return true;
+                });
         }
 
         /// <summary>
@@ -326,7 +334,21 @@ namespace gdd2xna
                         grid.ShuffleBoard();
                     else
                     {
-                        step = GameStep.Complete;
+                        if (game.Mode == GameMode.TurnBased)
+                        {
+                            step = GameStep.Complete;
+                        }
+                        else if (game.Mode == GameMode.RealTime)
+                        {
+                            if (index == 0)
+                            {
+                                step = GameStep.Input;
+                            }
+                            else
+                            {
+                                step = GameStep.Waiting;
+                            }
+                        }
                         grid.ClearSelection();
                     }
                 }
@@ -352,7 +374,7 @@ namespace gdd2xna
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch, SpriteFont font)
         {
             // Draw the grid
-            grid.Draw(spriteBatch, step == GameStep.Waiting);
+            grid.Draw(spriteBatch, step == GameStep.Waiting && game.Mode != GameMode.RealTime);
 
             // Check if we should draw any text.
             string text = null;

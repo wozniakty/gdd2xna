@@ -85,6 +85,16 @@ namespace gdd2xna
         /// <returns>If the button should be enabled.</returns>
         public delegate bool ButtonEnabler(Button button);
 
+        /// <summary>
+        /// Creates a new Button.
+        /// </summary>
+        /// <param name="texture">The texture for the button.</param>
+        /// <param name="location">The location of the button.</param>
+        /// <param name="text">The text of the button.</param>
+        /// <param name="font">The font that the text should be drawn in.</param>
+        /// <param name="callback">The callback for when the button is clicked.</param>
+        /// <param name="enabler">The enabler that determines if the button is clickable.</param>
+        /// <param name="visible">The enabler that determines if the button is visible.</param>
         public Button(
             Texture2D texture, 
             Vector2 location, 
