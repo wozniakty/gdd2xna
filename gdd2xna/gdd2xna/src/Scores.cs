@@ -141,8 +141,6 @@ namespace gdd2xna
                 amount *= -1;
             }
 
-            int index = -1;
-
             // Check if the bar is already locked.
             if (isLocked(type))
             {

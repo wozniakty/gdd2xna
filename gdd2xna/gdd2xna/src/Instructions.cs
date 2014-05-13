@@ -9,31 +9,25 @@ using Microsoft.Xna.Framework.Input;
 namespace gdd2xna
 {
     /// <summary>
-    /// The menu while a game is in progess.
+    /// The instructions view.
     /// </summary>
-    class GameMenu
+    class Instructions
     {
-
         /// <summary>
         /// The game instance.
         /// </summary>
         private readonly ViaGame game;
 
         /// <summary>
-        /// The button to create a new game.
+        /// The main menu button.
         /// </summary>
-        private Button newGameButton;
+        private Button mainMenuButton;
 
         /// <summary>
-        /// The button to exit the current game.
-        /// </summary>
-        private Button exitGameButton;
-
-        /// <summary>
-        /// Creates a new GameMenu.
+        /// Creates a new Instructions.
         /// </summary>
         /// <param name="game">The game instance.</param>
-        public GameMenu(ViaGame game)
+        public Instructions(ViaGame game)
         {
             this.game = game;
         }
@@ -44,65 +38,43 @@ namespace gdd2xna
         /// <param name="defaultFont">The default font.</param>
         public void LoadingComplete(SpriteFont defaultFont)
         {
-            int currentY = (game.graphics.PreferredBackBufferHeight) - (2 * game.buttonTexture.Height);
             int halfWidth = (game.graphics.PreferredBackBufferWidth / 2);
             int buttonX = halfWidth - (game.buttonTexture.Width / 2);
+            int buttonY = game.graphics.PreferredBackBufferHeight - game.buttonTexture.Height - 5;
 
             // Create the buttons
-            newGameButton = new Button(
+            mainMenuButton = new Button(
                 game.buttonTexture,
-                new Vector2(buttonX, currentY),
-                "New Game",
-                defaultFont,
-                delegate(Button button)
-                {
-                    game.State = GameState.Options;
-                },
-                null,
-                delegate(Button button)
-                {
-                    return game.IsGameOver();
-                }
-                );
-
-            currentY += game.buttonTexture.Height;
-
-            exitGameButton = new Button(
-                game.buttonTexture,
-                new Vector2(buttonX, currentY),
-                "Exit Game",
+                new Vector2(buttonX, buttonY),
+                "Main Menu",
                 defaultFont,
                 delegate(Button button)
                 {
                     game.State = GameState.Menu;
                 },
-                null, 
+                null,
                 null
                 );
         }
 
         /// <summary>
-        /// Update the menu.
+        /// Update the instructions.
         /// </summary>
         /// <param name="gameTime">The current game time.</param>
         public void Update(GameTime gameTime)
         {
-            newGameButton.Update(gameTime);
-            exitGameButton.Update(gameTime);
+            mainMenuButton.Update(gameTime);
         }
 
         /// <summary>
-        /// Draw the menu.
+        /// Draw the instructions.
         /// </summary>
         /// <param name="gameTime">The game time.</param>
         /// <param name="spriteBatch">The sprite batch.</param>
         /// <param name="defaultFont">The default font.</param>
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch, SpriteFont defaultFont)
         {
-            newGameButton.Draw(gameTime, spriteBatch);
-            exitGameButton.Draw(gameTime, spriteBatch);
+            mainMenuButton.Draw(gameTime, spriteBatch);
         }
-        
-
     }
 }

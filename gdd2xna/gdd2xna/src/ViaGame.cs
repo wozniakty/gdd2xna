@@ -18,10 +18,21 @@ namespace gdd2xna
     public enum GameState
     {
         Menu, // On the main menu
+        Instructions, // On the instructions screen
+        Options, // On the game option screen
         NetworkSearch, // Searching for opponent online
         LocalPlay, // Playing locally against an opponent
         NetworkPlay, // Playing against an opponent on the network
         Error, // An error occurred; probably with the network
+    }
+
+    /// <summary>
+    /// The possible game modes.
+    /// </summary>
+    public enum GameMode
+    {
+        TurnBased,
+        RealTime
     }
 
     /// <summary>
@@ -51,7 +62,7 @@ namespace gdd2xna
         /// <summary>
         /// The build number of the game.
         /// </summary>
-        public static readonly int GAME_BUILD = 3;
+        public static readonly int GAME_BUILD = 4;
 
         /// <summary>
         /// The constant for the large game size.
@@ -116,6 +127,16 @@ namespace gdd2xna
         private readonly ErrorView errorView;
 
         /// <summary>
+        /// The instructions view.
+        /// </summary>
+        private readonly Instructions instructions;
+
+        /// <summary>
+        /// The options view.
+        /// </summary>
+        private readonly Options options;
+
+        /// <summary>
         /// The random generator.
         /// </summary>
         private readonly ViaRandom random;
@@ -124,6 +145,11 @@ namespace gdd2xna
         /// The current game state.
         /// </summary>
         private GameState state = GameState.Menu;
+
+        /// <summary>
+        /// The current game mode.
+        /// </summary>
+        private GameMode mode = GameMode.TurnBased;
 
         #endregion
 
@@ -154,6 +180,10 @@ namespace gdd2xna
                 {
                     gameClient.Shutdown(false);
                 }
+                else if (value == GameState.Options)
+                {
+                    options.Error = "";
+                }
                 state = value;
                 if (value == GameState.NetworkPlay)
                 {
@@ -165,6 +195,22 @@ namespace gdd2xna
         }
 
         /// <summary>
+        /// The current game mode property.
+        /// </summary>
+        public GameMode Mode
+        {
+            get
+            {
+                return mode;
+            }
+
+            set
+            {
+                mode = value;
+            }
+        }
+
+        /// <summary>
         /// The game client property.
         /// </summary>
         public GameClient Client
@@ -172,6 +218,17 @@ namespace gdd2xna
             get
             {
                 return gameClient;
+            }
+        }
+
+        /// <summary>
+        /// The game options.
+        /// </summary>
+        public Options Options
+        {
+            get
+            {
+                return options;
             }
         }
 
@@ -214,6 +271,8 @@ namespace gdd2xna
             gameMenu = new GameMenu(this);
             gameClient = new GameClient(this);
             errorView = new ErrorView(this);
+            instructions = new Instructions(this);
+            options = new Options(this);
 
             SizeMode = sizeMode;
             if (sizeMode == SIZE_SMALL)
@@ -319,15 +378,15 @@ namespace gdd2xna
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
             HamSandwich = Content.Load<Texture2D>("Art/Ham_Sandwich");
-            Broccoli = Content.Load<Texture2D>("Art/Brocoli_Tile");
-            Carrot = Content.Load<Texture2D>("Art/Carrot_Tile");
-            Corn = Content.Load<Texture2D>("Art/Corn_Tile");
-            Eggplant = Content.Load<Texture2D>("Art/Eggplant_Tile");
-            Tomato = Content.Load<Texture2D>("Art/Tomato_Tile");
-            Onion = Content.Load<Texture2D>("Art/Onion_Tile");
-            Radish = Content.Load<Texture2D>("Art/Radish_Tile");
+            Broccoli = Content.Load<Texture2D>("Art/V2/Brocoli_Tile");
+            Carrot = Content.Load<Texture2D>("Art/V2/Carrot_Tile");
+            Corn = Content.Load<Texture2D>("Art/V2/Corn_Tile");
+            Eggplant = Content.Load<Texture2D>("Art/V2/Eggplant_Tile");
+            Tomato = Content.Load<Texture2D>("Art/V2/Tomato_Tile");
+            Onion = Content.Load<Texture2D>("Art/V2/Onion_Tile");
+            Radish = Content.Load<Texture2D>("Art/V2/Radish_Tile");
             Grid_Art = Content.Load<Texture2D>("Art/VIA_Grid_V2");
-            logo = Content.Load<Texture2D>("Art/VIA_Logo");
+            logo = Content.Load<Texture2D>("Art/V2/VIA_Logo");
             buttonTexture = Content.Load<Texture2D>("Art/button");
             defaultFont = Content.Load<SpriteFont>("Fonts/Default");
             Pixel = new Texture2D(GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
@@ -341,6 +400,8 @@ namespace gdd2xna
             gameMenu.LoadingComplete(defaultFont);
             gameClient.LoadingComplete(defaultFont);
             errorView.LoadingComplete(defaultFont);
+            instructions.LoadingComplete(defaultFont);
+            options.LoadingComplete(defaultFont);
 
             Console.WriteLine("Starting Via client build " + GAME_BUILD + ".");
         }
@@ -382,6 +443,12 @@ namespace gdd2xna
                 case GameState.Menu:
                     mainMenu.Update(gameTime);
                     break;
+                case GameState.Instructions:
+                    instructions.Update(gameTime);
+                    break;
+                case GameState.Options:
+                    options.Update(gameTime);
+                    break;
                 case GameState.NetworkSearch:
                     gameClient.Update(gameTime);
                     break;
@@ -392,25 +459,28 @@ namespace gdd2xna
                     {
                         next.Update(gameTime);
 
-                        // Check if the player has finished their turn.
-                        if (next.step == GameStep.Complete)
+                        if (mode == GameMode.TurnBased && !IsGameOver())
                         {
-                            // If so, mark them as waiting
-                            next.step = GameStep.Waiting;
-
-                            int index = (next.Index + 1) % players.Length;
-
-                            // And active the next player
-                            if (state == GameState.LocalPlay)
+                            // Check if the player has finished their turn.
+                            if (next.step == GameStep.Complete)
                             {
-                                players[index].step = GameStep.Input;
-                            }
-                            else if (state == GameState.NetworkPlay)
-                            {
-                                if (index == 0)
+                                // If so, mark them as waiting
+                                next.step = GameStep.Waiting;
+
+                                int index = (next.Index + 1) % players.Length;
+
+                                // And activate the next player
+                                if (state == GameState.LocalPlay)
+                                {
                                     players[index].step = GameStep.Input;
-                                else
-                                    players[index].step = GameStep.NetworkInput;
+                                }
+                                else if (state == GameState.NetworkPlay)
+                                {
+                                    if (index == 0)
+                                        players[index].step = GameStep.Input;
+                                    else
+                                        players[index].step = GameStep.NetworkInput;
+                                }
                             }
                         }
                     }
@@ -437,7 +507,7 @@ namespace gdd2xna
         protected override void Draw(GameTime gameTime)
         {
             // No more cornflower blue!
-            GraphicsDevice.Clear(Color.Black);
+            GraphicsDevice.Clear(Color.DarkGray);
 
             // Start drawing
             spriteBatch.Begin();
@@ -447,6 +517,12 @@ namespace gdd2xna
                 case GameState.Menu:
                     // Draw the main menu
                     mainMenu.Draw(gameTime, spriteBatch, defaultFont);
+                    break;
+                case GameState.Instructions:
+                    instructions.Draw(gameTime, spriteBatch, defaultFont);
+                    break;
+                case GameState.Options:
+                    options.Draw(gameTime, spriteBatch, defaultFont);
                     break;
                 case GameState.NetworkSearch:
                     gameClient.Draw(gameTime, spriteBatch, defaultFont);
