@@ -27,7 +27,7 @@ namespace gdd2xna
         /// <summary>
         /// The points per tile.
         /// </summary>
-        private static readonly int POINTS_PER_TILE = 13; // Need a good value for this (13)
+        private static readonly int POINTS_PER_TILE = 13; // Need a good value for this (13) (32 for testing)
 
         /// <summary>
         /// The size of the board in pixels.
@@ -250,10 +250,12 @@ namespace gdd2xna
                 else if (step == GameStep.CheckMatch || step == GameStep.CheckMatchShuffle)
                 {
                     var matches = grid.FindMatches();
-                    GameStep nextStep = GameStep.Input;
+                    GameStep noMatchStep = GameStep.Input;
+                    GameStep noMatchNetworkStep = GameStep.Input;
                     if (step == GameStep.CheckMatchShuffle)
                     {
-                        nextStep = GameStep.CheckDeadlock;
+                        noMatchStep = GameStep.CheckDeadlock;
+                        noMatchNetworkStep = GameStep.CheckDeadlock;
                     }
                     if (matches.Count == 0)
                     {
@@ -261,17 +263,17 @@ namespace gdd2xna
 
                         if (game.State == GameState.LocalPlay)
                         {
-                            step = nextStep;
+                            step = noMatchStep;
                         }
                         else if (game.State == GameState.NetworkPlay)
                         {
                             if (index == 0)
                             {
-                                step = nextStep;
+                                step = noMatchStep;
                             }
                             else
                             {
-                                step = GameStep.NetworkInput;
+                                step = noMatchNetworkStep;
                             }
                         }
                     }
