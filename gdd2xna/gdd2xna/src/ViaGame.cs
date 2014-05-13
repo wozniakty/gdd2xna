@@ -62,7 +62,7 @@ namespace gdd2xna
         /// <summary>
         /// The build number of the game.
         /// </summary>
-        public static readonly int GAME_BUILD = 5;
+        public static readonly int GAME_BUILD = 6;
 
         /// <summary>
         /// The constant for the large game size.
@@ -152,6 +152,11 @@ namespace gdd2xna
         /// </summary>
         private GameMode mode = GameMode.TurnBased;
 
+        /// <summary>
+        /// Is rotten mode enabled.
+        /// </summary>
+        private bool rottenMode = false;
+
         #endregion
 
         #region Properties
@@ -223,6 +228,17 @@ namespace gdd2xna
         }
 
         /// <summary>
+        /// The scores.
+        /// </summary>
+        public Scores Scores
+        {
+            get
+            {
+                return scores;
+            }
+        }
+
+        /// <summary>
         /// The game options.
         /// </summary>
         public Options Options
@@ -252,6 +268,21 @@ namespace gdd2xna
             get
             {
                 return random;
+            }
+        }
+
+        /// <summary>
+        /// The rotten mode property.
+        /// </summary>
+        public bool RottenMode
+        {
+            get
+            {
+                return rottenMode;
+            }
+            set
+            {
+                rottenMode = value;
             }
         }
 
