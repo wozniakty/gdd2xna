@@ -62,7 +62,7 @@ namespace gdd2xna
         /// <summary>
         /// The sound manager instance.
         /// </summary>
-        private readonly SoundManager soundManager;
+        private readonly LegacySoundManager soundManager;
 
         /// <summary>
         /// The scores instance.
@@ -111,7 +111,7 @@ namespace gdd2xna
         /// <param name="index">The index of the player.</param>
         /// <param name="soundManager">The sound manager.</param>
         /// <param name="scores">The scores instance.</param>
-        public Player(ViaGame game, int index, SoundManager soundManager, Scores scoreBars)
+        public Player(ViaGame game, int index, LegacySoundManager soundManager, Scores scoreBars)
         {
             this.game = game;
             this.index = index;
