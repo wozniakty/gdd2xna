@@ -75,9 +75,8 @@
     <Reference Include="System.Net" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Audio\MusicManager.cs" />
     <Compile Include="Audio\SoundEffectName.cs" />
-    <Compile Include="Audio\SoundManager.cs" />
+    <Compile Include="Audio\LegacySoundManager.cs" />
     <Compile Include="src\ErrorView.cs" />
     <Compile Include="src\GameClient.cs" />
     <Compile Include="src\Button.cs" />
@@ -87,6 +86,7 @@
     <Compile Include="src\Input.cs" />
     <Compile Include="src\Instructions.cs" />
     <Compile Include="src\MainMenu.cs" />
+    <Compile Include="src\MusicManager.cs" />
     <Compile Include="src\Options.cs" />
     <Compile Include="src\OutgoingPackets.cs" />
     <Compile Include="src\Packet.cs" />

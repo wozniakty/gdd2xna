@@ -62,7 +62,7 @@ namespace gdd2xna
         /// <summary>
         /// The build number of the game.
         /// </summary>
-        public static readonly int GAME_BUILD = 6;
+        public static readonly int GAME_BUILD = 7;
 
         /// <summary>
         /// The constant for the large game size.
@@ -77,8 +77,8 @@ namespace gdd2xna
         #region Fields
         public GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-        MusicManager musicManager;
-        SoundManager soundManager;
+        //LegacyMusicManager musicManager;
+        LegacySoundManager soundManager;
         SpriteFont defaultFont;
         public Texture2D HamSandwich;
         public Texture2D Broccoli;
@@ -141,6 +141,11 @@ namespace gdd2xna
         /// The random generator.
         /// </summary>
         private readonly ViaRandom random;
+
+        /// <summary>
+        /// The music manager.
+        /// </summary>
+        private readonly MusicManager musicManager;
 
         /// <summary>
         /// The current game state.
@@ -296,8 +301,9 @@ namespace gdd2xna
         {
             random = new ViaRandom(this);
             graphics = new GraphicsDeviceManager(this);
-            musicManager = new MusicManager(this);
-            soundManager = new SoundManager(this);
+            //musicManager = new LegacyMusicManager(this);
+            musicManager = new MusicManager();
+            soundManager = new LegacySoundManager(this);
             scores = new Scores(this, soundManager);
             mainMenu = new MainMenu(this, soundManager);
             gameMenu = new GameMenu(this);
@@ -395,7 +401,7 @@ namespace gdd2xna
         {
             this.IsMouseVisible = true;
             // load songs to musicManager and play
-            musicManager.Initialize();
+            //musicManager.Initialize();
             musicOn = true;
             soundManager.Initialize();
             base.Initialize();
@@ -424,6 +430,8 @@ namespace gdd2xna
             defaultFont = Content.Load<SpriteFont>("Fonts/Default");
             Pixel = new Texture2D(GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
             Pixel.SetData(new[] { Color.White });
+
+            musicManager.Load(Content);
 
             foreach (Player next in players)
             {

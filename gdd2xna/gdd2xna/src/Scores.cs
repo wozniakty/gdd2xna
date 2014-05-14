@@ -28,7 +28,7 @@ namespace gdd2xna
         /// <summary>
         /// The sound manager.
         /// </summary>
-        private readonly SoundManager soundManager;
+        private readonly LegacySoundManager soundManager;
 
         /// <summary>
         /// The bar values for each tile type.
@@ -50,7 +50,7 @@ namespace gdd2xna
         /// </summary>
         /// <param name="game">The game instance.</param>
         /// <param name="soundManager">The sound manager.</param>
-        public Scores(ViaGame game, SoundManager soundManager)
+        public Scores(ViaGame game, LegacySoundManager soundManager)
         {
             this.game = game;
             this.soundManager = soundManager;
