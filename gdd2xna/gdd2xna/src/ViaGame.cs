@@ -62,7 +62,7 @@ namespace gdd2xna
         /// <summary>
         /// The build number of the game.
         /// </summary>
-        public static readonly int GAME_BUILD = 9;
+        public static readonly int GAME_BUILD = 10;
 
         /// <summary>
         /// The constant for the large game size.
@@ -77,8 +77,6 @@ namespace gdd2xna
         #region Fields
         public GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-        //LegacyMusicManager musicManager;
-        LegacySoundManager soundManager;
         SpriteFont defaultFont;
         public Texture2D HamSandwich;
         public Texture2D Broccoli;
@@ -146,6 +144,11 @@ namespace gdd2xna
         /// The music manager.
         /// </summary>
         private readonly MusicManager musicManager;
+
+        /// <summary>
+        /// The sound manager.
+        /// </summary>
+        private readonly SoundManager soundManager;
 
         /// <summary>
         /// The current game state.
@@ -303,7 +306,7 @@ namespace gdd2xna
             graphics = new GraphicsDeviceManager(this);
             //musicManager = new LegacyMusicManager(this);
             musicManager = new MusicManager();
-            soundManager = new LegacySoundManager(this);
+            soundManager = new SoundManager(this);
             scores = new Scores(this, soundManager);
             mainMenu = new MainMenu(this, soundManager);
             gameMenu = new GameMenu(this);
@@ -400,10 +403,9 @@ namespace gdd2xna
         protected override void Initialize()
         {
             this.IsMouseVisible = true;
-            // load songs to musicManager and play
-            //musicManager.Initialize();
             musicOn = true;
-            soundManager.Initialize();
+
+            //soundManager.Initialize();
             base.Initialize();
         }
 
