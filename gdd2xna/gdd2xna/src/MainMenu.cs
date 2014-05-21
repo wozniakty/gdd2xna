@@ -26,7 +26,7 @@ namespace gdd2xna
         /// <summary>
         /// The sound manager.
         /// </summary>
-        private readonly LegacySoundManager soundManager;
+        private readonly SoundManager soundManager;
 
         /// <summary>
         /// The bounds of the logo.
@@ -63,7 +63,7 @@ namespace gdd2xna
         /// </summary>
         /// <param name="game">The game instance.</param>
         /// <param name="soundManager">The sound manager.</param>
-        public MainMenu(ViaGame game, LegacySoundManager soundManager)
+        public MainMenu(ViaGame game, SoundManager soundManager)
         {
             this.game = game;
             this.soundManager = soundManager;

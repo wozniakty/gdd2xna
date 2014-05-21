@@ -75,8 +75,6 @@
     <Reference Include="System.Net" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Audio\SoundEffectName.cs" />
-    <Compile Include="Audio\LegacySoundManager.cs" />
     <Compile Include="src\ErrorView.cs" />
     <Compile Include="src\GameClient.cs" />
     <Compile Include="src\Button.cs" />
@@ -92,6 +90,7 @@
     <Compile Include="src\Packet.cs" />
     <Compile Include="src\Player.cs" />
     <Compile Include="src\Program.cs" />
+    <Compile Include="src\SoundManager.cs" />
     <Compile Include="src\ViaGame.cs" />
     <Compile Include="src\Scores.cs" />
     <Compile Include="src\Tile.cs" />
@@ -132,6 +131,7 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\Microsoft.Xna.GameStudio.targets" />
   <!--
