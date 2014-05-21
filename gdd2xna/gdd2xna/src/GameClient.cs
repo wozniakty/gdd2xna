@@ -34,7 +34,7 @@ namespace gdd2xna
         /// <summary>
         /// The network protocol version of the client.
         /// </summary>
-        public static readonly int NETWORK_PROTOCOL_VERSION = 6;
+        public static readonly int NETWORK_PROTOCOL_VERSION = 7;
 
         /// <summary>
         /// The network error message.
@@ -301,6 +301,7 @@ namespace gdd2xna
             const int SHUFFLE = 3;
             const int LOGOUT = 4;
             const int FILL_RANDOM = 5;
+            const int SET_SCORE = 6;
 
             if (DEBUG)
             {
@@ -352,6 +353,11 @@ namespace gdd2xna
                     {
                         randomQueues[playerIndex].Add(p.readDWord());
                     }
+                    break;
+                case SET_SCORE:
+                    int type = p.readUnsignedWord();
+                    int score = p.readDWord();
+                    game.Scores.set(type, score);
                     break;
             }
         }

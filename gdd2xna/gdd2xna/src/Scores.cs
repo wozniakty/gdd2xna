@@ -201,6 +201,23 @@ namespace gdd2xna
         }
 
         /// <summary>
+        /// Set the bar for the specified tile type to the specified value.
+        /// </summary>
+        /// <param name="typeIndex">The tile type.</param>
+        /// <param name="score">The score.</param>
+        public void set(int typeIndex, int score)
+        {
+            TileType type = (TileType)typeIndex;
+            bars[type] = score;
+            
+            int winner = getWinningPlayer();
+            if (winner != -1)
+            {
+                game.SetWinner(winner);
+            }
+        }
+
+        /// <summary>
         /// Check if a player has won.
         /// </summary>
         /// <returns>The index of the winning player, or -1.</returns>

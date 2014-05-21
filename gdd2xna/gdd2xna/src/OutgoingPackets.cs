@@ -44,5 +44,10 @@ namespace gdd2xna
         /// The ID of the GAME_OVER packet.
         /// </summary>
         public static readonly int GAME_OVER = 6;
+
+        /// <summary>
+        /// The ID of the INCREASE_SCORE packet.
+        /// </summary>
+        public static readonly int INCREASE_SCORE = 7;
     }
 }
