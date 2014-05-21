@@ -55,11 +55,6 @@ namespace gdd2xna
         private readonly Grid grid;
 
         /// <summary>
-        /// The scores of the player.
-        /// </summary>
-        private Dictionary<TileType, int> scores = new Dictionary<TileType,int>();
-
-        /// <summary>
         /// The sound manager instance.
         /// </summary>
         private readonly LegacySoundManager soundManager;
@@ -137,16 +132,6 @@ namespace gdd2xna
         public void Reset()
         {
             grid.Reset();
-
-            // Populate the scores dictionary
-            foreach (TileType next in Enum.GetValues(typeof(TileType)))
-            {
-                // No sammiches!
-                if (next == TileType.Emp)
-                    continue;
-
-                scores[next] = 0;
-            }
 
             step = GameStep.Waiting;
             prevSwap = new int[2] { 0, 0 };
@@ -335,8 +320,22 @@ namespace gdd2xna
                             foreach (var tile in match)
                             {
                                 TileType type = grid[tile].type;
-                                scores[type] += points;
-                                winIndex = scoreBars.add(type, index, points);
+                                if (game.State == GameState.NetworkPlay)
+                                {
+                                    // Tell the server we scored, but only for our player
+                                    // as the server will tell the other play we scored.
+                                    if (index == 0)
+                                    {
+                                        Packet p = new Packet(OutgoingPackets.INCREASE_SCORE);
+                                        p.writeWord((int)type);
+                                        p.writeWord(points);
+                                        game.Client.WritePacket(p);
+                                    }
+                                }
+                                else
+                                {
+                                    winIndex = scoreBars.add(type, index, points);
+                                }
                             }
                                 
                             grid.EmptyTiles(match);
